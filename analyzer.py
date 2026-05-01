@@ -38,6 +38,9 @@ def check_Food_Interactions(drug_obj):
     """
     Returns warnings about foods to avoid together with this drug,
     based on the drug's food_interactions list.
+    Covers: alcohol, caffeine, tyramine, grapefruit juice, and similar
+    substance-level interactions. These appear only in the OUTPUT,
+    they are NOT collected as patient inputs.
 
     :param drug_obj: Drug
     :return: list[str] (one warning per food category)
@@ -46,11 +49,13 @@ def check_Food_Interactions(drug_obj):
 def check_Patient_Risks(patient_obj, drug_obj):
     """
     Raises warning for the conditions matching risks that are specialized for patient
-    by comparing the medical_conditions that patient has been listed before and
-    the risk_factors of drug
+    by comparing the medical_conditions/is_pregnant (if female) against the risk_factors.
 
     :param patient_obj: Patient
     :param drug_obj:    Drug
     :return: list[str] (one warning per matched condition)
+    - "DO NOT USE"  — if condition is an absolute contraindication for this drug
+    - "CAUTION"     — if condition requires dose adjustment or close monitoring
+    - pregnancy is always treated as "CAUTION / consult your doctor"
     """
     pass

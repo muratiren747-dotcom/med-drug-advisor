@@ -33,12 +33,13 @@ class Patient:
     Patient class that stores the patient information (personal and medical profile of user) from the database_mgr.py
     Patient object is built right after the successful login to the database
     """
-    def __init__(self, username, age, sex, weight, medical_conditions = None):
+    def __init__(self, username, age, sex, weight, medical_conditions = None, is_pregnant = False):
         self.username = username
         self.age = age
         self.sex = sex
         self.weight = weight
         self.medical_conditions = medical_conditions if medical_conditions is not None else []
+        self.is_pregnant = is_pregnant
         self.history = []
 
     def update_Profile(self, age = None, sex = None, weight = None, medical_conditions = None):
