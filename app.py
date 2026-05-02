@@ -19,13 +19,16 @@ from analyzer import (
 )
 import database_mgr
 
+EMERGENCY_DISCLAIMER = "..."
+
 def show_Disclaimer():
     """
     Displays the 112-style emergency disclaimer banner.
     Called on every page render via main() so it is always visible.
     Rendered as a Streamlit warning box (st.warning).
-    st.warning(EMERGENCY_DISCLAIMER)
     """
+    st.warning(EMERGENCY_DISCLAIMER)
+    pass
 
 def render_Login_Page():
     """
@@ -33,6 +36,7 @@ def render_Login_Page():
     User can either create a new account (calling create_User_Account)
     or log in with existing credentials (calling login_User).
     """
+    pass
 
 def render_Profile_Page():
     """
@@ -45,6 +49,7 @@ def render_Profile_Page():
     and passed to check_Patient_Risks() at analysis time - they are not
     re-entered on each analysis.
     """
+    pass
 
 def render_Analysis_Page():
     """
@@ -59,6 +64,7 @@ def render_Analysis_Page():
     The result is also saved through the save_History() onto the database.
     Emergency disclaimer (show_Disclaimer) is always visible at the top.
     """
+    pass
 
 def render_History_Page():
     """
@@ -67,7 +73,7 @@ def render_History_Page():
     """
     pass
 
-def renderSettingsPage():
+def render_Settings_Page():
     """
     Allows the user to update their profile (update_User_Profile) including is_pregnant
     and medical_conditions fields,
@@ -83,15 +89,17 @@ def main():
 
     Routing logic:
         - If not authenticated  ->  render_Login_Page()
-        - If first-time login   ->  render_Profile_Page()
-        - Otherwise sidebar navigation ->  Analysis | History | Settings | Logout
+        - Elif first-time login   ->  render_Profile_Page()
+        - Else (sidebar navigation) ->  Analysis | History | Settings | Logout
 
     show_Disclaimer() is called on every render cycle so the emergency
     warning is always visible regardless of the active page.
     """
-    database_mgr.initDB()
+    database_mgr.init_DB()
     show_Disclaimer()
     pass
 
 if __name__ == "__main__":
+    # runs the main() if the file is run directly,
+    # unable to run main() when imported to another file
     main()

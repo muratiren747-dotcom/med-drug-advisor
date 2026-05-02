@@ -42,7 +42,7 @@ class Patient:
         self.is_pregnant = is_pregnant
         self.history = []
 
-    def update_Profile(self, age = None, sex = None, weight = None, medical_conditions = None):
+    def update_Profile(self, age = None, sex = None, weight = None, medical_conditions = None, is_pregnant = None):
         """
         Method that updates patient information when the user edits their profile.
         Only fields that are provided (not None) will be updated.

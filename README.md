@@ -1,75 +1,75 @@
-# Psy-Med-Advisor APP
+# Psy-Med-Advisor App
 **Patient-Centric Psychiatric Medication Analyzer**
 
-Psy-Med-Advisor, psikiyatrik ilaç kullanan hastalar için geliştirilmiş, 
-mekanizma şeffaflığı sağlayan ve kişiselleştirilmiş risk analizi yapan 
-deterministik bir karar destek prototipidir.
+Psy-Med-Advisor is a deterministic decision-support prototype designed
+for patients taking psychiatric medications. It provides mechanism-level
+transparency and personalized risk analysis.
 
 
 
-## Projenin Amacı
-Mevcut genel ilaç denetleyicilerindeki (Drugs.com, Medscape vb.) 
-psikiyatriye özel derinlik eksikliğini ve hasta odaklı olmayan 
-dil problemini çözmeyi hedefler.
+## Project Goal
+Existing general drug interaction checkers (Drugs.com, Medscape, etc.)
+lack psychiatry-specific depth and are written in clinical language
+that patients cannot easily interpret. This project addresses both gaps.
 
-**Sistemimiz şu parametrelere göre analiz yapar:**
-* **Kişiselleştirme:** Yaş, kilo ve cinsiyete göre doz analizi.
-* **Mekanizma Şeffaflığı:** CYP enzimleri ve reseptör seviyesinde DDI.
-* **Besin Etkileşimi:** Alkol, kafein ve tiramin gibi spesifik uyarılar.
-* **Güvenlik:** Deterministik motor sayesinde "hallucination" riskini önler.
+**The system analyzes medications based on:**
+* **Personalization:** Dose analysis based on age, weight, and sex.
+* **Mechanism Transparency:** DDI at the level of CYP enzymes and receptors.
+* **Food Interactions:** Specific warnings for alcohol, caffeine, tyramine, grapefruit.
+* **Safety:** A deterministic engine eliminates LLM hallucination risk.
 
 
 
-## Kurulum ve Çalıştırma Rehberi
-Uygulamayı yerel bilgisayarınızda ayağa kaldırmak için aşağıdaki adımları izleyin:
+## Setup and Run Guide
+To run the application locally, follow these steps:
 
-1. **Repoyu Klonlayın:**
-   ```bash
+1. **Clone the repository:**
+```bash
    git clone https://github.com/mrtirn/Psy-Med-Advisor.git
    cd Psy-Med-Advisor
-   ```
+```
 
-2. **Gerekli Kütüphaneleri Yükleyin:**
-   *(Not: Streamlit gibi bağımlılıklar otomatik yüklenecektir)*
-   ```bash
+2. **Install required libraries:**
+   *(Note: dependencies such as Streamlit will be installed automatically.)*
+```bash
    pip install -r requirements.txt
-   ```
+```
 
-3. **Uygulamayı Başlatın:**
-   ```bash
+3. **Launch the application:**
+```bash
    streamlit run app.py
-   ```
-   *Komutu çalıştırdıktan sonra uygulama varsayılan tarayıcınızda (genellikle localhost:8501) açılacaktır.*
+```
+   *Once the command runs, the app will open in your default browser (typically at localhost:8501).*
 
 
 
-## Teknik Mimari (Backbone)
-Proje, modüler bir yapıda 4 ana Python dosyasından oluşur:
+## Technical Architecture (Backbone)
+The project follows a modular structure built around 4 core Python files:
 
-* **`models.py`**: `Drug` ve `Patient` sınıflarını (OOP) barındırır.
-* **`analyzer.py`**: Doz, yolak (pathway) ve risk analiz motorudur.
-* **`database_mgr.py`**: SQLite tabanlı yerel veri yönetimi (Manager).
-* **`app.py`**: Streamlit tabanlı kullanıcı arayüzü ve ana merkezdir.
+* **`models.py`**: Holds the `Drug` and `Patient` classes (OOP).
+* **`analyzer.py`**: The dose, pathway, and risk analysis engine.
+* **`database_mgr.py`**: Local SQLite-based data management (Manager).
+* **`app.py`**: Streamlit-based user interface and central hub.
 
 
 
-## Dosya Yapısı
+## File Structure
 ```text
 Psy-Med-Advisor/
-├── app.py              # UI ve Ana Fonksiyon (Main Hub)
-├── models.py           # Veri Sınıfları (Drug & Patient)
-├── analyzer.py         # Analiz Algoritmaları
-├── database_mgr.py     # Yerel SQLite Veritabanı Yönetimi
-├── drugs.json          # 15 İlaçlık Klinik Bilgi Havuzu
-├── requirements.txt    # Gerekli Kütüphaneler (Streamlit vb.)
-├── README.md           # Proje Dokümantasyonu
-└── benchmark/          # LLM Karşılaştırma Modülü
+├── app.py              # UI and Main Function (Main Hub)
+├── models.py           # Data Classes (Drug & Patient)
+├── analyzer.py         # Analysis Algorithms
+├── database_mgr.py     # Local SQLite Database Management
+├── drugs.json          # Curated Knowledge Base (10–15 drugs)
+├── requirements.txt    # Required Libraries (Streamlit etc.)
+├── README.md           # Project Documentation
+└── benchmark/          # LLM Comparison Module (see benchmark/README.md for further directions on benchmarking)
 ```
 
 
 
-## Gizlilik ve Etik Notu
-* **Veri Gizliliği:** Bu bir akademik prototiptir. Veriler herhangi bir sunucuya 
-gönderilmez, sadece yerel `local_db.sqlite` dosyasında saklanır.
-* **Sorumluluk Reddi:** Bu uygulama tıbbi bir tavsiye niteliği taşımaz; 
-bilgilendirme amaçlıdır. Tedavi süreçleriniz için mutlaka doktorunuza danışın.
+## Privacy and Ethics Note
+* **Data Privacy:** This is an academic prototype. No data is sent to any
+external server; everything is stored locally in ``local_db.sqlite``.
+* **Disclaimer:** This application does not provide medical advice; it is
+informational only. Always consult your doctor regarding your treatment.

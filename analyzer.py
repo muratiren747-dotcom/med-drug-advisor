@@ -45,6 +45,7 @@ def check_Food_Interactions(drug_obj):
     :param drug_obj: Drug
     :return: list[str] (one warning per food category)
     """
+    pass
 
 def check_Patient_Risks(patient_obj, drug_obj):
     """

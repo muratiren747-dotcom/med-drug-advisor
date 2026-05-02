@@ -11,10 +11,10 @@ import sqlite3
 import hashlib
 import json
 
-def initDB(db_name="local_db.sqlite"):
+def init_DB(db_name = "local_db.sqlite"):
     """
-    Creates the SQLite database and required tables (users, history)
-    if they do not already exist. Called once at app startup.
+    Creates the SQLite database and required tables (users, history) if they do not already exist.
+    Called once at app startup.
     """
     pass
 
