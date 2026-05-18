@@ -3,103 +3,44 @@
 app.py
 ------
 
-The central Streamlit application. Main hub that orchestrates the
-user interface, the database, and the analyzer.
+Flask backend entry point. Registers blueprints, configures CORS,
+and initializes the database on startup.
 Run with:
-    streamlit run app.py
+    python app.py
 """
 
-import streamlit as st
-from models import Drug, Patient
-from analyzer import (
-    check_Dose_Safety,
-    check_Pathway_Conflict,
-    check_Food_Interactions,
-    check_Patient_Risks,
-)
-import database_mgr
+import os
+from flask import Flask, jsonify
+from flask_cors import CORS
 
-EMERGENCY_DISCLAIMER = "..."
+from core import database_mgr
+from routes.auth import auth_bp
+from routes.profile import profile_bp
+from routes.history import history_bp
+from routes.analysis import analysis_bp
 
-def show_Disclaimer():
-    """
-    Displays the 112-style emergency disclaimer banner.
-    Called on every page render via main() so it is always visible.
-    Rendered as a Streamlit warning box (st.warning).
-    """
-    st.warning(EMERGENCY_DISCLAIMER)
-    pass
 
-def render_Login_Page():
-    """
-    Displays the login / registration page.
-    User can either create a new account (calling create_User_Account)
-    or log in with existing credentials (calling login_User).
-    """
-    pass
+def create_app():
+    app = Flask(__name__)
+    app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-CHANGE-ME")
 
-def render_Profile_Page():
-    """
-    Shown after first-time registration.
-    Asks the user to fill in their medical profile with consecutive inputs:
-    age, sex, weight, is_pregnant (yes/no, only shown if sex == female),
-    medical_conditions (multi-select from a predifined list of medical conditions).
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
 
-    Note: medical_conditions and is_pregnant are stored in the profile
-    and passed to check_Patient_Risks() at analysis time - they are not
-    re-entered on each analysis.
-    """
-    pass
+    app.register_blueprint(auth_bp,     url_prefix="/api")
+    app.register_blueprint(profile_bp,  url_prefix="/api")
+    app.register_blueprint(history_bp,  url_prefix="/api")
+    app.register_blueprint(analysis_bp, url_prefix="/api")
 
-def render_Analysis_Page():
-    """
-    The main analysis page.
-    User selects one or more drugs and enters daily dose.
-    Calls all four functions from analyzer.py and displays the results as
-    colored warning cards:
-        - INFO    → blue card
-        - CAUTION → yellow card
-        - DANGER / DO NOT USE → red card (most prominent, shown first)
+    @app.route("/health")
+    def health():
+        return jsonify({"status": "ok"})
 
-    The result is also saved through the save_History() onto the database.
-    Emergency disclaimer (show_Disclaimer) is always visible at the top.
-    """
-    pass
+    return app
 
-def render_History_Page():
-    """
-    Lists the user's past drug analyses retrieved from get_History().
-    Each row can be clicked to re-display the original analysis result.
-    """
-    pass
 
-def render_Settings_Page():
-    """
-    Allows the user to update their profile (update_User_Profile) including is_pregnant
-    and medical_conditions fields,
-    and to permanently delete their account (delete_User_Account).
-    """
-    pass
-
-def main():
-    """
-    The central main function that orchestrates the Streamlit application.
-    Initializes the database on startup and routes the user to the correct
-    page depending on the session state (logged in or not).
-
-    Routing logic:
-        - If not authenticated  ->  render_Login_Page()
-        - Elif first-time login   ->  render_Profile_Page()
-        - Else (sidebar navigation) ->  Analysis | History | Settings | Logout
-
-    show_Disclaimer() is called on every render cycle so the emergency
-    warning is always visible regardless of the active page.
-    """
-    database_mgr.init_DB()
-    show_Disclaimer()
-    pass
-
+# runs the main() if the file is run directly,
+# unable to run main() when imported to another file
 if __name__ == "__main__":
-    # runs the main() if the file is run directly,
-    # unable to run main() when imported to another file
-    main()
+    database_mgr.init_db()
+    app = create_app()
+    app.run(host="0.0.0.0", port=5000, debug=True)

@@ -21,7 +21,7 @@ class Drug:
         self.side_effects = side_effects
         self.risk_factors = risk_factors
 
-    def get_Info(self):
+    def get_info(self):
         """
         :return: A dictionary of all drug attributes in human-readable form
         for use in the analysis report.
@@ -42,7 +42,7 @@ class Patient:
         self.is_pregnant = is_pregnant
         self.history = []
 
-    def update_Profile(self, age = None, sex = None, weight = None, medical_conditions = None, is_pregnant = None):
+    def update_profile(self, age = None, sex = None, weight = None, medical_conditions = None, is_pregnant = None):
         """
         Method that updates patient information when the user edits their profile.
         Only fields that are provided (not None) will be updated.

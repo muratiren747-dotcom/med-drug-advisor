@@ -9,7 +9,7 @@ runs four independent checkers, and returns warning messages.
 
 from models import Drug, Patient
 
-def check_Dose_Safety(patient_obj, drug_obj, daily_dose):
+def check_dose_safety(patient_obj, drug_obj, daily_dose):
     """
     Checks whether the inputted daily dose is suitable and safe considering the patient's
     profile limitations (age, weight, etc.) and drug's max_dose attribute.
@@ -21,7 +21,7 @@ def check_Dose_Safety(patient_obj, drug_obj, daily_dose):
     """
     pass
 
-def check_Pathway_Conflict(drug_list):
+def check_pathway_conflict(drug_list):
     """
     Given a list of Drug objects, finds shared metabolic pathways
     (CYP enzymes) or receptor overlaps that could cause interactions or conflicts.
@@ -34,7 +34,7 @@ def check_Pathway_Conflict(drug_list):
     """
     pass
 
-def check_Food_Interactions(drug_obj):
+def check_food_interactions(drug_obj):
     """
     Returns warnings about foods to avoid together with this drug,
     based on the drug's food_interactions list.
@@ -47,7 +47,7 @@ def check_Food_Interactions(drug_obj):
     """
     pass
 
-def check_Patient_Risks(patient_obj, drug_obj):
+def check_patient_risks(patient_obj, drug_obj):
     """
     Raises warning for the conditions matching risks that are specialized for patient
     by comparing the medical_conditions/is_pregnant (if female) against the risk_factors.
