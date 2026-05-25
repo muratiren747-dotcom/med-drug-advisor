@@ -1,0 +1,48 @@
+// 4 sample drugs to work with, will be replaced by real data
+[
+  {
+    "name": "Sertraline",
+    "pathway": ["CYP2D6", "CYP3A4"],
+    "max_dose": 200,
+    "food_interactions": ["alcohol"],
+    "side_effects": ["nausea", "insomnia", "sexual dysfunction"],
+    "risk_factors": {
+      "pregnancy": "CAUTION",
+      "bipolar_disorder": "CAUTION"
+    }
+  },
+  {
+    "name": "Fluoxetine",
+    "pathway": ["CYP2D6"],
+    "max_dose": 80,
+    "food_interactions": ["alcohol"],
+    "side_effects": ["nausea", "insomnia", "anxiety"],
+    "risk_factors": {
+      "pregnancy": "CAUTION",
+      "MAOI_use": "DO NOT USE"
+    }
+  },
+  {
+    "name": "Tramadol",
+    "pathway": ["CYP2D6", "CYP3A4"],
+    "max_dose": 400,
+    "food_interactions": ["alcohol", "grapefruit"],
+    "side_effects": ["dizziness", "constipation", "sedation"],
+    "risk_factors": {
+      "seizure_disorder": "DO NOT USE",
+      "MAOI_use": "DO NOT USE"
+    }
+  },
+  {
+    "name": "Phenelzine",
+    "pathway": ["MAO_A", "MAO_B"],
+    "max_dose": 90,
+    "food_interactions": ["tyramine", "alcohol"],
+    "side_effects": ["orthostatic hypotension", "weight gain", "insomnia"],
+    "risk_factors": {
+      "pregnancy": "DO NOT USE",
+      "SSRI_use": "DO NOT USE",
+      "hypertension": "CAUTION"
+    }
+  }
+]

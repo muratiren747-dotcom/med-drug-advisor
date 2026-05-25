@@ -19,7 +19,11 @@ def check_dose_safety(patient_obj, drug_obj, daily_dose):
     :param daily_dose:  float
     :return: a string message starting with one of {"INFO", "CAUTION", "DANGER"}
     """
-    pass
+    # MOCK — Person 2 replaces with real logic
+    if daily_dose > drug_obj.max_dose:
+        return f"DANGER: {daily_dose}mg exceeds max dose of {drug_obj.max_dose}mg for {drug_obj.name}."
+    return f"INFO: {daily_dose}mg is within range for {drug_obj.name}."
+
 
 def check_pathway_conflict(drug_list):
     """
@@ -32,7 +36,14 @@ def check_pathway_conflict(drug_list):
                "shared_pathway": ["CYP2D6"],
                "severity": "caution"}]
     """
-    pass
+    # MOCK
+    if len(drug_list) < 2:
+        return []
+    return [{
+        "drugs": (drug_list[0].name, drug_list[1].name),
+        "shared_pathway": ["CYP2D6"],
+        "severity": "CAUTION"
+    }]
 
 def check_food_interactions(drug_obj):
     """
@@ -45,7 +56,10 @@ def check_food_interactions(drug_obj):
     :param drug_obj: Drug
     :return: list[str] (one warning per food category)
     """
-    pass
+    # MOCK
+    return [f"CAUTION: Avoid {food} while taking {drug_obj.name}."
+            for food in drug_obj.food_interactions]
+
 
 def check_patient_risks(patient_obj, drug_obj):
     """
@@ -59,4 +73,12 @@ def check_patient_risks(patient_obj, drug_obj):
     - "CAUTION"     — if condition requires dose adjustment or close monitoring
     - pregnancy is always treated as "CAUTION / consult your doctor"
     """
-    pass
+    # MOCK
+    warnings = []
+    if patient_obj.is_pregnant and drug_obj.risk_factors.get("pregnancy"):
+        warnings.append(f"DANGER: {drug_obj.name} is contraindicated in pregnancy.")
+    for condition in (patient_obj.medical_conditions or []):
+        if condition in drug_obj.risk_factors:
+            severity = drug_obj.risk_factors[condition]
+            warnings.append(f"{severity}: {condition} affects use of {drug_obj.name}.")
+    return warnings
