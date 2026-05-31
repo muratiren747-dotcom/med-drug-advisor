@@ -22,6 +22,12 @@ class Drug:
         self.risk_factors = risk_factors
 
     def get_info(self):
+        return {"name": self.name,
+                "pathway": self.pathway,
+                "max_dose": self.max_dose,
+                "food_interactions": self.food_interactions,
+                "risk_factors": self.risk_factors}
+
         """
         :return: A dictionary of all drug attributes in human-readable form
         for use in the analysis report.
