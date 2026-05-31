@@ -32,7 +32,6 @@ class Drug:
         :return: A dictionary of all drug attributes in human-readable form
         for use in the analysis report.
         """
-        pass
 
 class Patient:
     """
@@ -64,4 +63,3 @@ class Patient:
         Method that updates patient information when the user edits their profile.
         Only fields that are provided (not None) will be updated.
         """
-        pass
