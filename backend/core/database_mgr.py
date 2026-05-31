@@ -116,6 +116,22 @@ def login_user(username, password):
         is_pregnant=bool(row["is_pregnant"]),
         medical_conditions=conditions)
 
+
+def get_patient(username):
+    """Look up Patient by username only for already authenticated users."""
+    con = _get_connection()
+    cursor = con.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    row = cursor.fetchone()
+    con.close()
+    if row is None:
+        return None
+    conditions = json.loads(row["medical_conditions"]) if row["medical_conditions"] else []
+    return Patient(
+        username=row["username"], age=row["age"], sex=row["sex"], weight=row["weight"],
+        is_pregnant=bool(row["is_pregnant"]), medical_conditions=conditions
+    )
+
 def update_user_profile(username, patient_info):
     """
     Updates the user's medical profile when edited from the Settings page.
