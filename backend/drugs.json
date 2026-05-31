@@ -1,48 +1,247 @@
-// 4 sample drugs to work with, will be replaced by real data
+// 15 most consumed psychiatric drugs worldwide
 [
   {
     "name": "Sertraline",
-    "pathway": ["CYP2D6", "CYP3A4"],
+    "pathway": ["CYP2C19", "CYP2D6", "CYP3A4"],
     "max_dose": 200,
     "food_interactions": ["alcohol"],
-    "side_effects": ["nausea", "insomnia", "sexual dysfunction"],
+    "side_effects": [
+      "nausea", "diarrhea", "insomnia", "sexual dysfunction",
+      "tremor", "sweating", "serotonin syndrome"
+    ],
     "risk_factors": {
+      "MAOI_use": "DO NOT USE",
       "pregnancy": "CAUTION",
-      "bipolar_disorder": "CAUTION"
+      "bipolar_disorder": "CAUTION",
+      "QT_prolongation": "CAUTION"
     }
   },
   {
     "name": "Fluoxetine",
-    "pathway": ["CYP2D6"],
+    "pathway": ["CYP2D6", "CYP2C9", "CYP2C19", "CYP3A4"],
     "max_dose": 80,
     "food_interactions": ["alcohol"],
-    "side_effects": ["nausea", "insomnia", "anxiety"],
+    "side_effects": [
+      "nausea", "insomnia", "anxiety", "headache",
+      "sexual dysfunction", "serotonin syndrome"
+    ],
     "risk_factors": {
+      "MAOI_use": "DO NOT USE",
       "pregnancy": "CAUTION",
-      "MAOI_use": "DO NOT USE"
+      "bipolar_disorder": "CAUTION",
+      "long_half_life": "CAUTION"
     }
   },
   {
-    "name": "Tramadol",
-    "pathway": ["CYP2D6", "CYP3A4"],
-    "max_dose": 400,
-    "food_interactions": ["alcohol", "grapefruit"],
-    "side_effects": ["dizziness", "constipation", "sedation"],
+    "name": "Escitalopram",
+    "pathway": ["CYP2C19", "CYP3A4", "CYP2D6"],
+    "max_dose": 20,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "nausea", "insomnia", "sexual dysfunction",
+      "fatigue", "QT prolongation"
+    ],
     "risk_factors": {
-      "seizure_disorder": "DO NOT USE",
-      "MAOI_use": "DO NOT USE"
+      "MAOI_use": "DO NOT USE",
+      "pregnancy": "CAUTION",
+      "QT_prolongation": "CAUTION",
+      "elderly": "LOWER DOSE (max 10mg)"
     }
   },
   {
-    "name": "Phenelzine",
-    "pathway": ["MAO_A", "MAO_B"],
-    "max_dose": 90,
-    "food_interactions": ["tyramine", "alcohol"],
-    "side_effects": ["orthostatic hypotension", "weight gain", "insomnia"],
+    "name": "Paroxetine",
+    "pathway": ["CYP2D6"],
+    "max_dose": 60,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "nausea", "sexual dysfunction", "weight gain",
+      "sedation", "discontinuation syndrome", "sweating"
+    ],
+    "risk_factors": {
+      "MAOI_use": "DO NOT USE",
+      "pregnancy": "DO NOT USE",
+      "QT_prolongation": "CAUTION",
+      "abrupt_discontinuation": "CAUTION"
+    }
+  },
+  {
+    "name": "Venlafaxine",
+    "pathway": ["CYP2D6", "CYP3A4"],
+    "max_dose": 375,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "nausea", "hypertension", "insomnia", "sexual dysfunction",
+      "sweating", "serotonin syndrome", "discontinuation syndrome"
+    ],
+    "risk_factors": {
+      "MAOI_use": "DO NOT USE",
+      "pregnancy": "CAUTION",
+      "hypertension": "CAUTION",
+      "cardiac_disease": "CAUTION"
+    }
+  },
+  {
+    "name": "Duloxetine",
+    "pathway": ["CYP1A2", "CYP2D6"],
+    "max_dose": 120,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "nausea", "dry mouth", "constipation",
+      "fatigue", "sweating", "hepatotoxicity"
+    ],
+    "risk_factors": {
+      "MAOI_use": "DO NOT USE",
+      "pregnancy": "CAUTION",
+      "liver_disease": "DO NOT USE",
+      "alcohol_use": "CAUTION"
+    }
+  },
+  {
+    "name": "Bupropion",
+    "pathway": ["CYP2B6"],
+    "max_dose": 450,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "insomnia", "dry mouth", "headache",
+      "agitation", "seizures", "hypertension"
+    ],
+    "risk_factors": {
+      "MAOI_use": "DO NOT USE",
+      "seizure_disorder": "DO NOT USE",
+      "eating_disorder": "DO NOT USE",
+      "pregnancy": "CAUTION"
+    }
+  },
+  {
+    "name": "Mirtazapine",
+    "pathway": ["CYP1A2", "CYP2D6", "CYP3A4"],
+    "max_dose": 45,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "sedation", "weight gain", "increased appetite",
+      "dry mouth", "dizziness", "constipation"
+    ],
+    "risk_factors": {
+      "MAOI_use": "DO NOT USE",
+      "pregnancy": "CAUTION",
+      "elderly": "CAUTION"
+    }
+  },
+  {
+    "name": "Amitriptyline",
+    "pathway": ["CYP2D6", "CYP2C19", "CYP1A2"],
+    "max_dose": 300,
+    "food_interactions": ["alcohol", "tyramine"],
+    "side_effects": [
+      "sedation", "dry mouth", "constipation", "urinary retention",
+      "QT prolongation", "orthostatic hypotension", "weight gain"
+    ],
+    "risk_factors": {
+      "MAOI_use": "DO NOT USE",
+      "cardiac_disease": "DO NOT USE",
+      "pregnancy": "CAUTION",
+      "elderly": "CAUTION",
+      "glaucoma": "CAUTION"
+    }
+  },
+  {
+    "name": "Quetiapine",
+    "pathway": ["CYP3A4"],
+    "max_dose": 800,
+    "food_interactions": ["alcohol", "grapefruit"],
+    "side_effects": [
+      "sedation", "weight gain", "metabolic syndrome",
+      "QT prolongation", "orthostatic hypotension", "tardive dyskinesia"
+    ],
+    "risk_factors": {
+      "MAOI_use": "CAUTION",
+      "elderly_dementia": "DO NOT USE",
+      "diabetes": "CAUTION",
+      "pregnancy": "CAUTION",
+      "QT_prolongation": "CAUTION"
+    }
+  },
+  {
+    "name": "Aripiprazole",
+    "pathway": ["CYP2D6", "CYP3A4"],
+    "max_dose": 30,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "akathisia", "insomnia", "nausea",
+      "restlessness", "weight gain", "headache"
+    ],
+    "risk_factors": {
+      "MAOI_use": "CAUTION",
+      "elderly_dementia": "DO NOT USE",
+      "pregnancy": "CAUTION",
+      "CYP2D6_poor_metabolizer": "LOWER DOSE (50%)"
+    }
+  },
+  {
+    "name": "Haloperidol",
+    "pathway": ["CYP2D6", "CYP3A4", "CYP1A2"],
+    "max_dose": 20,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "EPS", "tardive dyskinesia", "QT prolongation",
+      "neuroleptic malignant syndrome", "sedation", "orthostatic hypotension"
+    ],
+    "risk_factors": {
+      "MAOI_use": "CAUTION",
+      "cardiac_disease": "CAUTION",
+      "Parkinson_disease": "DO NOT USE",
+      "elderly": "CAUTION",
+      "pregnancy": "CAUTION"
+    }
+  },
+  {
+    "name": "Lithium",
+    "pathway": ["RENAL"],
+    "max_dose": 1800,
+    "food_interactions": ["alcohol", "caffeine", "low_sodium_diet"],
+    "side_effects": [
+      "tremor", "polyuria", "polydipsia", "weight gain",
+      "cognitive dulling", "hypothyroidism", "renal impairment"
+    ],
+    "risk_factors": {
+      "renal_disease": "DO NOT USE",
+      "pregnancy": "DO NOT USE",
+      "dehydration": "CAUTION",
+      "NSAID_use": "CAUTION",
+      "sodium_depletion": "CAUTION"
+    }
+  },
+  {
+    "name": "Valproate",
+    "pathway": ["CYP2C9", "CYP2C19"],
+    "max_dose": 2000,
+    "food_interactions": ["alcohol"],
+    "side_effects": [
+      "weight gain", "tremor", "sedation", "alopecia",
+      "hepatotoxicity", "thrombocytopenia", "pancreatitis"
+    ],
     "risk_factors": {
       "pregnancy": "DO NOT USE",
-      "SSRI_use": "DO NOT USE",
-      "hypertension": "CAUTION"
+      "liver_disease": "DO NOT USE",
+      "childbearing_age": "CAUTION",
+      "elderly": "CAUTION"
+    }
+  },
+  {
+    "name": "Diazepam",
+    "pathway": ["CYP2C19", "CYP3A4"],
+    "max_dose": 40,
+    "food_interactions": ["alcohol", "grapefruit"],
+    "side_effects": [
+      "sedation", "dependence", "memory impairment",
+      "respiratory depression", "ataxia", "withdrawal syndrome"
+    ],
+    "risk_factors": {
+      "MAOI_use": "CAUTION",
+      "respiratory_disease": "DO NOT USE",
+      "substance_use_disorder": "DO NOT USE",
+      "pregnancy": "DO NOT USE",
+      "elderly": "CAUTION"
     }
   }
 ]
