@@ -2,7 +2,7 @@
 **LLM Comparison for Psy-Med-Advisor**
 
 This module compares our deterministic, curated system against
-general-purpose LLMs (GPT-4, Claude, Gemini) on the same set of
+general-purpose LLMs (Gemini, Groq) on the same set of
 psychiatric drug-interaction scenarios.
 
 
@@ -10,14 +10,14 @@ psychiatric drug-interaction scenarios.
 ## Purpose
 General-purpose LLMs are increasingly used by patients to ask
 medication questions. They are accessible but known to hallucinate
-and give inconsistent answers. This module measures that gap.
+and give inconsistent answers. This module measures that gap quantitatively — comparing accuracy, speed, consistency, and
+hallucination rate across systems.
 
-**We compare four systems on identical scenarios:**
+**We compare three systems on identical scenarios:**
+
 * **Our system:** Deterministic, sourced, curated knowledge base.
 * **Gemini API:** Free tier, automated.
 * **Groq API (Llama 3.3):** Free tier, automated.
-* **GPT-4 / Claude:** Manual entry from web interface since they do not offer a totally free API access for now.
-
 
 
 ## Methodology
@@ -25,13 +25,16 @@ Each scenario in `test_cases.json` defines a patient profile, a drug
 list, and the expected warnings (ground truth). Every system runs
 on the same input and is scored against the ground truth.
 
-**Metrics computed:**
-* **Precision:** Correct warnings / total warnings raised.
-* **Recall:** True dangers caught / total real dangers.
-* **F1:** Harmonic mean of precision and recall.
-* **Hallucination rate:** Warnings raised with no basis in ground truth.
-* **Consistency:** Variance across repeated runs (LLMs only).
+LLM systems (Gemini, Groq) are queried 5 times per scenario to
+measure consistency. Response time is recorded for each query.
 
+**Metrics computed:**
+* **Accuracy:** Correct warnings / total expected warnings.
+* **Hallucination rate:** Warnings raised with no basis in ground truth.
+* **Speed:** Average response time per query (seconds).
+* **Consistency:** Percentage of identical responses across 5 repeated runs (LLMs only).
+* **Source transparency:** Whether the system can cite the source of each warning.
+* **Cost:** API cost per query (our system: free, LLMs: paid).
 
 
 ## How to Run
@@ -59,20 +62,18 @@ on the same input and is scored against the ground truth.
 
 
 
-## File Structure
-```text
 benchmark/
-├── README.md           # This file
-├── test_cases.json     # Ground-truth scenarios (50–80 cases)
-├── evaluate.py         # Runs each system + scores against ground truth
-├── visualize.py        # Generates comparison charts
-└── results/            # Generated outputs (CSV + PNG)
+├── README.md               # This file
+├── test_cases.json         # Ground-truth scenarios (15-20 cases)
+├── evaluate.py             # Runs each system + scores against ground truth
+├── visualize.py            # Generates comparison charts
+└── results/
+    ├── scored_results.csv  # Automated results (Gemini, Groq)
+    ├── manual_results.csv  # Manual results (GPT-4, Claude) if applicable
+    └── *.png               # Comparison charts
 ```
 
 
 
-## Note on Manual LLMs
-GPT-4 and Claude do not offer fully free API access. For these,
-the same prompts are sent through their web interfaces and responses
-are entered manually into `results/manual_results.csv`. The scoring
-logic in `evaluate.py` treats manual and automatic results uniformly.
+Note on LLM Selection
+We use Gemini and Groq APIs for automated comparison — both offer free tier access with no credit card required. GPT-4 and Claude are excluded from the automated benchmark as they do not offer fully free API access. If manual comparison is desired, the same prompts can be sent through their web interfaces and results entered manually into results/manual_results.csv.
