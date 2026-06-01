@@ -21,9 +21,10 @@ hallucination rate across systems.
 
 
 ## Methodology
-Each scenario in `test_cases.json` defines a patient profile, a drug
-list, and the expected warnings (ground truth). Every system runs
-on the same input and is scored against the ground truth.
+The benchmark runs on the user's own drug query — the same patient 
+profile and drug list submitted for analysis is automatically sent 
+to Gemini and Groq for comparison. test_cases.json contains 
+additional pre-defined scenarios for offline testing only.
 
 LLM systems (Gemini, Groq) are queried 5 times per scenario to
 measure consistency. Response time is recorded for each query.
@@ -38,23 +39,28 @@ measure consistency. Response time is recorded for each query.
 
 
 ## How to Run
-1. **Get free API keys (one-time setup):**
-   * Gemini: https://aistudio.google.com/apikey
-   * Groq:   https://console.groq.com/keys
 
-2. **Set environment variables:**
-```bash
+The benchmark runs automatically from the app — after completing
+a drug analysis, click "Compare with AI" to trigger the benchmark
+for your specific query.
+
+For offline testing:
+1. Get free API keys (one-time setup):
+   * Gemini: https://aistudio.google.com/apikey
+   * Groq: https://console.groq.com/keys
+
+2. Set environment variables:
+   # Mac/Linux:
    export GEMINI_API_KEY="your_key_here"
    export GROQ_API_KEY="your_key_here"
-```
+   # Windows:
+   set GEMINI_API_KEY=your_key_here
+   set GROQ_API_KEY=your_key_here
 
-3. **Run the benchmark:**
-```bash
-   python evaluate.py
-```
-   *Reads `test_cases.json`, queries each system, writes results to `results/scored_results.csv`.*
+3. python evaluate.py   → runs pre-defined test cases
+4. python visualize.py  → generates charts to results/
 
-4. **Generate charts:**
+ **Generate charts:**
 ```bash
    python visualize.py
 ```
@@ -69,7 +75,6 @@ benchmark/
 ├── visualize.py            # Generates comparison charts
 └── results/
     ├── scored_results.csv  # Automated results (Gemini, Groq)
-    ├── manual_results.csv  # Manual results (GPT-4, Claude) if applicable
     └── *.png               # Comparison charts
 ```
 
