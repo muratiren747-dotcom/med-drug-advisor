@@ -98,7 +98,7 @@ function Benchmark() {
 }
 
 const styles = {
-  page: { backgroundColor: '#f8fafb', minHeight: '100vh', padding: '2rem' },
+  page: { backgroundColor: '#f5f0eb', minHeight: '100vh', padding: '2rem' },
   container: { maxWidth: '700px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' },
   title: { textAlign: 'center', color: '#1a3d2b', fontSize: '1.8rem', fontWeight: '700' },
   intro: { textAlign: 'center', color: '#4b5563', fontSize: '1rem', lineHeight: '1.7' },

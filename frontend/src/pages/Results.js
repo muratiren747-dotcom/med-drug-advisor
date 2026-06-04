@@ -10,7 +10,7 @@ function Results() {
 
   if (!state) { navigate('/analyze'); return null; }
 
-  const { result, drugs } = state;
+  const { result, drugs, symptoms = [] } = state;
   const warnings = result.warnings || [];
 
   const interactions = warnings.filter(w => typeof w === 'object' && w.drugs);
@@ -113,7 +113,59 @@ function Results() {
             ✅ Herhangi bir risk tespit edilmedi.
           </div>
         )}
+        {symptoms.length > 0 && (
+  <div style={styles.section}>
+    <div style={styles.sectionLabel}>BELİRTİ ANALİZİ</div>
+    {symptoms.map((symptom, i) => {
+      const drugNames = drugs.map(d => d.name.toLowerCase());
+const sideEffectsMap = {
+  'sertraline': ['nausea', 'insomnia', 'sweating', 'tremor', 'sexual dysfunction'],
+  'fluoxetine': ['nausea', 'insomnia', 'anxiety', 'headache', 'sexual dysfunction'],
+  'escitalopram': ['nausea', 'insomnia', 'sexual dysfunction', 'fatigue'],
+  'paroxetine': ['nausea', 'sexual dysfunction', 'weight gain', 'sedation', 'sweating'],
+  'venlafaxine': ['nausea', 'hypertension', 'insomnia', 'sweating'],
+  'duloxetine': ['nausea', 'dry mouth', 'constipation', 'fatigue', 'sweating'],
+  'bupropion': ['insomnia', 'dry mouth', 'headache', 'agitation'],
+  'mirtazapine': ['sedation', 'weight gain', 'dry mouth', 'dizziness'],
+  'amitriptyline': ['sedation', 'dry mouth', 'constipation', 'weight gain'],
+  'quetiapine': ['sedation', 'weight gain', 'dizziness'],
+  'aripiprazole': ['insomnia', 'nausea', 'restlessness', 'headache'],
+  'haloperidol': ['sedation'],
+  'lithium': ['tremor', 'weight gain'],
+  'valproate': ['weight gain', 'tremor', 'sedation'],
+  'diazepam': ['sedation', 'memory impairment'],
+};
+const allSideEffects = drugNames.flatMap(name => sideEffectsMap[name] || []).join(' ');
 
+
+      const symptomMap = {
+  'bulantı': 'nausea',
+  'baş dönmesi': 'dizziness',
+  'uykusuzluk': 'insomnia',
+  'kalp çarpıntısı': 'palpitation',
+  'nefes darlığı': 'respiratory',
+  'titreme': 'tremor',
+  'terleme': 'sweating',
+  'yorgunluk': 'fatigue',
+  'ağız kuruluğu': 'dry mouth',
+  'iştah kaybı': 'appetite',
+  'baş ağrısı': 'headache',
+  'sinirlilik': 'agitation',
+};
+const englishSymptom = symptomMap[symptom.toLowerCase()] || symptom.toLowerCase();
+const isCommon = allSideEffects.includes(englishSymptom);
+
+      return (
+        <div key={i} style={isCommon ? styles.cautionCard : styles.dangerCard}>
+          {isCommon
+            ? `✓ "${symptom}" — bu ilaçlarda görülebilen yaygın bir yan etkidir. Devam ederse doktorunuza danışın.`
+            : `⚠️ "${symptom}" — bu ilaçlarla doğrudan ilişkili değil. Devam ederse doktorunuza başvurun.`
+          }
+        </div>
+      );
+    })}
+  </div>
+)}
         <div style={styles.disclaimer}>
           Bu sistem yalnızca eğitim amaçlı bilgi sunar. Tıbbi tavsiye, teşhis veya reçete yerine geçmez. Acil bir durumda 112'yi arayınız.
         </div>
@@ -166,9 +218,9 @@ const styles = {
   title: { textAlign: 'center', color: '#1a3d2b', fontSize: '1.8rem', fontWeight: '700' },
   patientInput: { backgroundColor: 'white', borderRadius: '12px', padding: '1.25rem', border: '0.5px solid #e5e7eb' },
   cardRow: { display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.8rem' },
-  inputCard: { backgroundColor: '#f8fafb', borderRadius: '8px', padding: '0.8rem 1rem', minWidth: '140px' },
-  inputCardLabel: { fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.3rem' },
-  inputCardValue: { fontSize: '1rem', fontWeight: '600', color: '#1a3d2b' },
+  inputCard: { backgroundColor: '#f8fafb', borderRadius: '8px', padding: '0.8rem 1rem', minWidth: '140px', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+  inputCardLabel: { fontSize: '0.75rem', color: '#6b7280', marginBottom: '0.3rem', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+  inputCardValue: { fontSize: '1rem', fontWeight: '600', color: '#1a3d2b', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   section: { backgroundColor: 'white', borderRadius: '12px', padding: '1.25rem', border: '0.5px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '0.8rem' },
   sectionLabel: { fontSize: '0.75rem', fontWeight: '700', color: '#6b7280', letterSpacing: '1px', marginBottom: '0.5rem' },
   dangerSection: { backgroundColor: '#fff5f5', borderRadius: '12px', padding: '1.25rem', border: '1px solid #feb2b2' },

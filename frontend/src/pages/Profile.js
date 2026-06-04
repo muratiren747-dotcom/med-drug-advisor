@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 function Profile() {
@@ -12,6 +12,18 @@ function Profile() {
   const [conditions, setConditions] = useState('');
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/profile', { withCredentials: true })
+      .then(res => {
+        const data = res.data;
+        if (data.age) setAge(data.age);
+        if (data.sex) setSex(data.sex);
+        if (data.weight) setWeight(data.weight);
+        if (data.is_pregnant) setIsPregnant(data.is_pregnant);
+        if (data.medical_conditions) setConditions(data.medical_conditions.join(', '));
+      })
+      .catch(() => {});
+  }, []);
 
   const handleUpdate = async () => {
     try {
@@ -119,13 +131,13 @@ function Profile() {
 }
 
 const styles = {
-  page: { backgroundColor: '#f8fafb', minHeight: '100vh', padding: '2rem' },
+  page: { backgroundColor: '#f5f0eb', minHeight: '100vh', padding: '2rem' },
   container: { maxWidth: '600px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' },
   header: { display: 'flex', alignItems: 'center', gap: '1.5rem', backgroundColor: 'white', borderRadius: '16px', padding: '1.5rem', border: '0.5px solid #e5e7eb' },
   avatar: { width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#2d6a4f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.4rem', fontWeight: '700', flexShrink: 0 },
   name: { fontSize: '1.4rem', fontWeight: '700', color: '#1a3d2b', margin: 0 },
   subtitle: { fontSize: '0.9rem', color: '#6b7280', marginTop: '0.3rem' },
-  card: { backgroundColor: 'white', borderRadius: '12px', padding: '1.5rem', border: '0.5px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '1rem' },
+  card: { backgroundColor: 'white', borderRadius: '12px', padding: '1.5rem', border: '0.5px solid #e5e7eb', display: 'flex', flexDirection: 'column', gap: '1rem', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
   sectionLabel: { fontSize: '0.75rem', fontWeight: '700', color: '#6b7280', letterSpacing: '1px' },
   row: { display: 'flex', gap: '1rem' },
   inputGroup: { flex: 1, display: 'flex', flexDirection: 'column', gap: '0.3rem' },
