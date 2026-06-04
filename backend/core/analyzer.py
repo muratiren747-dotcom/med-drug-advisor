@@ -7,7 +7,7 @@ Core logic engine. Takes a Patient object and one or more Drug objects,
 runs four independent checkers, and returns warning messages.
 """
 
-from models import Drug, Patient
+from core.models import Drug, Patient
 
 def check_dose_safety(patient_obj, drug_obj, daily_dose):
     """
