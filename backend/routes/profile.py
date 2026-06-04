@@ -3,7 +3,22 @@ from core import database_mgr
 from routes import require_login
 
 profile_bp = Blueprint("profile", __name__)
-# Endpoints: PUT /api/profile
+
+@profile_bp.route("/profile", methods=["GET"])
+@require_login
+def get_profile():
+    username = session["username"]
+    patient = database_mgr.get_patient(username)
+    if patient is None:
+        return jsonify({"error": "user not found"}), 404
+    return jsonify({
+        "username": patient.username,
+        "age": patient.age,
+        "sex": patient.sex,
+        "weight": patient.weight,
+        "is_pregnant": patient.is_pregnant,
+        "medical_conditions": patient.medical_conditions
+    })
 
 @profile_bp.route("/profile", methods=["PUT"])
 @require_login
@@ -13,7 +28,6 @@ def update_profile():
     ok = database_mgr.update_user_profile(username, patient_info)
     if not ok:
         return jsonify({"error": "user not found"}), 404
-
     return jsonify({"ok": True})
 
 @profile_bp.route("/account", methods=["DELETE"])

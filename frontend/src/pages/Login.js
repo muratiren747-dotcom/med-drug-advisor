@@ -32,7 +32,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
-  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  const [quote] = useState(() => quotes[Math.floor(Math.random() * quotes.length)]);
 
   const handleLogin = async () => {
     try {
