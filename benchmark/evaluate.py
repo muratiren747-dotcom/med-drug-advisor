@@ -5,14 +5,15 @@ Benchmark module for Psy-Med-Advisor.
 Compares our system against Gemini and Groq APIs
 on the user's own drug query.
 """
-
 import sys
 import os
 import time
 import json
 import random
+import ast
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend', 'core'))
+backend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend'))
+sys.path.insert(0, backend_path)
 
 from core.analyzer import check_pathway_conflict, check_dose_safety, check_food_interactions, check_patient_risks
 from core.database_mgr import load_drug_database
@@ -44,18 +45,79 @@ def run_our_system(drug_entries, patient_data):
     return warnings
 
 
-def call_gemini_mock(drug_entries, patient_data):
-    time.sleep(random.uniform(1.2, 2.2))
-    possible = ["CYP2D6 conflict", "serotonin syndrome risk",
-                "sedation risk", "QT prolongation risk", "avoid alcohol"]
-    return random.sample(possible, k=random.randint(1, 3))
+def call_gemini(drug_entries, patient_data):
+    """Calls real Gemini API."""
+    import google.generativeai as genai
+
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        return ["ERROR: Gemini API key not found"], 0
+
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel("gemini-2.0-flash")
+
+    prompt = f"""You are a clinical pharmacist. Analyze the following drug combination for a patient and list safety warnings.
+
+Patient: {patient_data.get('age', 'unknown')} years old, {patient_data.get('sex', 'unknown')}, {patient_data.get('weight', 'unknown')}kg
+Drugs: {', '.join(drug_entries)}
+
+List ONLY the warnings as a Python list of short strings. Example format:
+["CYP2D6 conflict", "serotonin syndrome risk", "avoid alcohol"]
+
+Respond with ONLY the Python list, nothing else."""
+
+    start = time.time()
+    try:
+        response = model.generate_content(prompt)
+        elapsed = time.time() - start
+        text = response.text.strip()
+        warnings = ast.literal_eval(text)
+        if not isinstance(warnings, list):
+            warnings = [text]
+    except Exception as e:
+        elapsed = time.time() - start
+        warnings = ["Quota exceeded — try again later"]
+
+    return warnings, elapsed
 
 
-def call_groq_mock(drug_entries, patient_data):
-    time.sleep(random.uniform(0.5, 1.2))
-    possible = ["CYP2D6 conflict", "serotonin syndrome risk",
-                "sedation risk", "QT prolongation risk", "avoid alcohol"]
-    return random.sample(possible, k=random.randint(1, 3))
+def call_groq(drug_entries, patient_data):
+    """Calls real Groq API (Llama 3.3)."""
+    from groq import Groq
+
+    api_key = os.environ.get("GROQ_API_KEY")
+    if not api_key:
+        return ["ERROR: Groq API key not found"], 0
+
+    client = Groq(api_key=api_key)
+
+    prompt = f"""You are a clinical pharmacist. Analyze the following drug combination for a patient and list safety warnings.
+
+Patient: {patient_data.get('age', 'unknown')} years old, {patient_data.get('sex', 'unknown')}, {patient_data.get('weight', 'unknown')}kg
+Drugs: {', '.join(drug_entries)}
+
+List ONLY the warnings as a Python list of short strings. Example format:
+["CYP2D6 conflict", "serotonin syndrome risk", "avoid alcohol"]
+
+Respond with ONLY the Python list, nothing else."""
+
+    start = time.time()
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.3,
+        )
+        elapsed = time.time() - start
+        text = response.choices[0].message.content.strip()
+        warnings = ast.literal_eval(text)
+        if not isinstance(warnings, list):
+            warnings = [text]
+    except Exception as e:
+        elapsed = time.time() - start
+        warnings = [f"ERROR: {str(e)}"]
+
+    return warnings, elapsed
 
 
 def measure_consistency(results_list):
@@ -69,17 +131,15 @@ def measure_consistency(results_list):
 def run_single_benchmark(drug_entries, patient_data, our_result):
     gemini_runs, gemini_times = [], []
     for _ in range(NUM_RUNS):
-        start = time.time()
-        result = call_gemini_mock(drug_entries, patient_data)
+        result, t = call_gemini(drug_entries, patient_data)
         gemini_runs.append(result)
-        gemini_times.append(time.time() - start)
+        gemini_times.append(t)
 
     groq_runs, groq_times = [], []
     for _ in range(NUM_RUNS):
-        start = time.time()
-        result = call_groq_mock(drug_entries, patient_data)
+        result, t = call_groq(drug_entries, patient_data)
         groq_runs.append(result)
-        groq_times.append(time.time() - start)
+        groq_times.append(t)
 
     return {
         "our_result": our_result,

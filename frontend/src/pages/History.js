@@ -55,7 +55,7 @@ function History() {
                   </span>
                 </div>
                 <div style={styles.drugs}>
-                  💊 {item.analysis_result?.drugs?.join(' + ') || '—'}
+                   {item.analysis_result?.drugs?.join(' + ') || '—'}
                 </div>
                 <div style={styles.detailHint}>Detay için tıkla →</div>
               </div>
@@ -81,7 +81,7 @@ function History() {
                 {selected.analysis_result?.drugs?.map((drug, i) => (
                   <div key={i} style={styles.inputCard}>
                     <div style={styles.inputCardLabel}>İlaç {i + 1}</div>
-                    <div style={styles.inputCardValue}>💊 {drug}</div>
+                    <div style={styles.inputCardValue}> {drug}</div>
                   </div>
                 ))}
               </div>
