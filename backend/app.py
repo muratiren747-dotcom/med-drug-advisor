@@ -1,16 +1,5 @@
-"""
-------
-app.py
-------
-
-Flask backend entry point. Registers blueprints, configures CORS,
-and initializes the database on startup.
-Run with:
-    python app.py
-"""
-
 import os
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
 
 from core import database_mgr
@@ -18,6 +7,7 @@ from routes.auth import auth_bp
 from routes.profile import profile_bp
 from routes.history import history_bp
 from routes.analysis import analysis_bp
+from routes.benchmark import benchmark_bp
 
 
 def create_app():
@@ -30,6 +20,12 @@ def create_app():
     app.register_blueprint(profile_bp,  url_prefix="/api")
     app.register_blueprint(history_bp,  url_prefix="/api")
     app.register_blueprint(analysis_bp, url_prefix="/api")
+    app.register_blueprint(benchmark_bp, url_prefix="/api")
+
+    @app.route('/benchmark/charts/<filename>')
+    def benchmark_charts(filename):
+        charts_dir = os.path.join(os.path.dirname(__file__), '..', 'benchmark', 'results')
+        return send_from_directory(charts_dir, filename)
 
     @app.route("/health")
     def health():
@@ -38,8 +34,6 @@ def create_app():
     return app
 
 
-# runs the main() if the file is run directly,
-# unable to run main() when imported to another file
 if __name__ == "__main__":
     database_mgr.init_db()
     app = create_app()

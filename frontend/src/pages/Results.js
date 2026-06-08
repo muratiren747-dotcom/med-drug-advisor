@@ -6,6 +6,7 @@ function Results() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [benchmarkResult, setBenchmarkResult] = useState(null);
+  const [benchmarkDone, setBenchmarkDone] = useState(false);
   const [loading, setLoading] = useState(false);
 
   if (!state) { navigate('/analyze'); return null; }
@@ -35,6 +36,9 @@ function Results() {
         our_result: warnings
       }, { withCredentials: true });
       setBenchmarkResult(response.data);
+
+      setBenchmarkDone(true);
+      navigate('/benchmark', { state: { benchmarkResult: response.data, drugs } });
     } catch (err) {
       setBenchmarkResult({ error: 'Benchmark şu an kullanılamıyor.' });
     }
@@ -175,30 +179,70 @@ const isCommon = allSideEffects.includes(englishSymptom);
         </button>
 
         {benchmarkResult && !benchmarkResult.error && (
-          <div style={styles.benchmarkSection}>
-            <div style={styles.sectionLabel}>BENCHMARK SONUÇLARI</div>
-            <div style={styles.benchmarkGrid}>
-              <div style={styles.benchmarkCard}>
-                <div style={styles.benchmarkName}>Bizim Sistem</div>
-                <div style={styles.benchmarkStat}>⚡ {benchmarkResult.our_time}s</div>
-                <div style={styles.benchmarkStat}>🎯 {benchmarkResult.our_result?.length} uyarı</div>
-                <div style={{...styles.benchmarkBadge, backgroundColor: '#e8f5e9', color: '#2d6a4f'}}>%100 tutarlı</div>
-              </div>
-              <div style={styles.benchmarkCard}>
-                <div style={styles.benchmarkName}>Gemini</div>
-                <div style={styles.benchmarkStat}>⚡ {benchmarkResult.gemini_time}s</div>
-                <div style={styles.benchmarkStat}>🎯 {benchmarkResult.gemini_result?.length} uyarı</div>
-                <div style={{...styles.benchmarkBadge, backgroundColor: '#fff8e1', color: '#f57f17'}}>%{benchmarkResult.gemini_consistency} tutarlı</div>
-              </div>
-              <div style={styles.benchmarkCard}>
-                <div style={styles.benchmarkName}>Groq</div>
-                <div style={styles.benchmarkStat}>⚡ {benchmarkResult.groq_time}s</div>
-                <div style={styles.benchmarkStat}>🎯 {benchmarkResult.groq_result?.length} uyarı</div>
-                <div style={{...styles.benchmarkBadge, backgroundColor: '#fff8e1', color: '#f57f17'}}>%{benchmarkResult.groq_consistency} tutarlı</div>
-              </div>
+  <div style={styles.benchmarkSection}>
+    <div style={styles.sectionLabel}>BENCHMARK SONUÇLARI</div>
+    <div style={styles.benchmarkGrid}>
+      <div style={styles.benchmarkCard}>
+        <div style={styles.benchmarkName}>Psy-Med Advisor</div>
+        <div style={styles.benchmarkStat}>⚡ {benchmarkResult.our_time}s</div>
+        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.our_result?.length} uyarı</div>
+        <div style={{...styles.benchmarkBadge, backgroundColor: '#e8f5e9', color: '#2d6a4f'}}>%100 tutarlı</div>
+        <div style={styles.warningList}>
+          {benchmarkResult.our_result?.map((w, i) => (
+            <div key={i} style={styles.warningItem}>
+              {typeof w === 'string' ? w : `${w.drugs?.[0]} + ${w.drugs?.[1]}: ${w.shared_pathway}`}
             </div>
-          </div>
-        )}
+          ))}
+        </div>
+      </div>
+      <div style={styles.benchmarkCard}>
+        <div style={styles.benchmarkName}>Gemini</div>
+        <div style={styles.benchmarkStat}>⚡ {benchmarkResult.gemini_time}s</div>
+        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.gemini_result?.length} uyarı</div>
+        <div style={{...styles.benchmarkBadge, backgroundColor: '#fff8e1', color: '#f57f17'}}>%{benchmarkResult.gemini_consistency} tutarlı</div>
+        <div style={styles.warningList}>
+          {benchmarkResult.gemini_result?.map((w, i) => (
+            <div key={i} style={styles.warningItem}>{w}</div>
+          ))}
+        </div>
+      </div>
+      <div style={styles.benchmarkCard}>
+        <div style={styles.benchmarkName}>Groq</div>
+        <div style={styles.benchmarkStat}>⚡ {benchmarkResult.groq_time}s</div>
+        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.groq_result?.length} uyarı</div>
+        <div style={{...styles.benchmarkBadge, backgroundColor: '#fff8e1', color: '#f57f17'}}>%{benchmarkResult.groq_consistency} tutarlı</div>
+        <div style={styles.warningList}>
+          {benchmarkResult.groq_result?.map((w, i) => (
+            <div key={i} style={styles.warningItem}>{w}</div>
+          ))}
+        </div>
+      </div>
+    </div>
+    <div style={styles.chartsSection}>
+  <div style={styles.sectionLabel}>GRAFİKLER</div>
+  <div style={styles.chartsGrid}>
+    <img
+      src="http://localhost:5000/benchmark/charts/speed_chart.png"
+      alt="Hız karşılaştırması"
+      style={styles.chartImg}
+      onError={(e) => e.target.style.display='none'}
+    />
+    <img
+      src="http://localhost:5000/benchmark/charts/consistency_chart.png"
+      alt="Tutarlılık karşılaştırması"
+      style={styles.chartImg}
+      onError={(e) => e.target.style.display='none'}
+    />
+    <img
+      src="http://localhost:5000/benchmark/charts/warnings_chart.png"
+      alt="Uyarı sayısı"
+      style={styles.chartImg}
+      onError={(e) => e.target.style.display='none'}
+    />
+  </div>
+  </div>
+  </div>
+)}
 
         {benchmarkResult?.error && (
           <p style={{color: '#e53e3e', textAlign: 'center'}}>{benchmarkResult.error}</p>
@@ -240,6 +284,23 @@ const styles = {
   benchmarkName: { fontWeight: '700', fontSize: '0.95rem', color: '#1a3d2b' },
   benchmarkStat: { fontSize: '0.85rem', color: '#4b5563' },
   benchmarkBadge: { fontSize: '0.8rem', fontWeight: '600', padding: '0.3rem 0.6rem', borderRadius: '20px', textAlign: 'center', marginTop: '0.3rem' },
+  chartsSection: { marginTop: '1rem' },
+  chartsGrid: { display: 'flex', gap: '1rem', flexWrap: 'wrap' },
+  chartImg: { width: '100%', maxWidth: '320px', borderRadius: '8px', border: '0.5px solid #e5e7eb' },
+  warningList: {
+  marginTop: '0.8rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.4rem',
+},
+warningItem: {
+  fontSize: '0.8rem',
+  color: '#4b5563',
+  backgroundColor: '#f8fafb',
+  padding: '0.4rem 0.6rem',
+  borderRadius: '6px',
+  borderLeft: '3px solid #d1d5db',
+},
 };
 
 export default Results;

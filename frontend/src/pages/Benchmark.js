@@ -1,97 +1,122 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 function Benchmark() {
+  const { state } = useLocation();
   const navigate = useNavigate();
+  const result = state?.benchmarkResult;
+  const drugs = state?.drugs;
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
+        <h2 style={styles.title}>Benchmark Sonuçları</h2>
 
-        <h2 style={styles.title}>Benchmark Nedir?</h2>
-        <p style={styles.intro}>
-          Psy-Med Advisor deterministik bir sistemdir — aynı girdi her zaman aynı sonucu verir, kaynağı FDA onaylı verilerdir.
-          Benchmark modülü bu sistemi Gemini ve Groq gibi yapay zeka modelleriyle karşılaştırır.
-        </p>
+        {!result ? (
+          <>
+            <p style={styles.intro}>
+              Psy-Med Advisor deterministik bir sistemdir — aynı girdi her zaman aynı sonucu verir.
+              Benchmark modülü bu sistemi Gemini ve Groq ile karşılaştırır.
+            </p>
+            <div style={styles.section}>
+              <div style={styles.sectionLabel}>NASIL YAPILIR?</div>
+              <div style={styles.steps}>
+                <div style={styles.step}><div style={styles.stepNum}>1</div><div>Analiz sayfasına git ve ilaçlarını gir</div></div>
+                <div style={styles.step}><div style={styles.stepNum}>2</div><div>Analiz Et butonuna bas</div></div>
+                <div style={styles.step}><div style={styles.stepNum}>3</div><div>Sonuç sayfasındaki "AI ile Karşılaştır" butonuna bas</div></div>
+              </div>
+            </div>
+            <button style={styles.button} onClick={() => navigate('/analyze')}>Analize Git →</button>
+          </>
+        ) : (
+          <>
+            {drugs && (
+              <div style={styles.drugsBox}>
+                <span style={styles.smallLabel}>ANALİZ EDİLEN İLAÇLAR: </span>
+                <strong>{drugs.map(d => d.name).join(' + ')}</strong>
+              </div>
+            )}
 
-        <div style={styles.section}>
-          <div style={styles.sectionLabel}>NE KARŞILAŞTIRIYORUZ?</div>
-          <div style={styles.compareGrid}>
-            <div style={styles.ourCard}>
-              <div style={styles.cardTitle}>💊 Psy-Med Advisor</div>
-              <ul style={styles.list}>
-                <li>FDA onaylı, deterministik</li>
-                <li>Her zaman aynı sonuç</li>
-                <li>Kaynağı gösterebilir</li>
-                <li>Hallüsinasyon riski yok</li>
-                <li>Ortalama 0.02 saniye</li>
-              </ul>
+            {/* ÖZET KARTLAR */}
+            <div style={styles.summaryGrid}>
+              <div style={styles.summaryCard}>
+                <div style={styles.summaryTitle}>Psy-Med Advisor</div>
+                <div style={styles.summaryRow}><span>Hız</span><strong>{result.our_time}s</strong></div>
+                <div style={styles.summaryRow}><span>Uyarı</span><strong>{result.our_result?.length}</strong></div>
+                <div style={styles.summaryRow}><span>Tutarlılık</span><strong style={{color:'#2d6a4f'}}>%100</strong></div>
+              </div>
+              <div style={styles.summaryCard}>
+                <div style={styles.summaryTitle}>Gemini</div>
+                <div style={styles.summaryRow}><span>Hız</span><strong>{result.gemini_time}s</strong></div>
+                <div style={styles.summaryRow}><span>Uyarı</span><strong>{result.gemini_result?.length}</strong></div>
+                <div style={styles.summaryRow}><span>Tutarlılık</span><strong style={{color:'#f57f17'}}>%{result.gemini_consistency}</strong></div>
+              </div>
+              <div style={styles.summaryCard}>
+                <div style={styles.summaryTitle}>⚡ Groq</div>
+                <div style={styles.summaryRow}><span>Hız</span><strong>{result.groq_time}s</strong></div>
+                <div style={styles.summaryRow}><span>Uyarı</span><strong>{result.groq_result?.length}</strong></div>
+                <div style={styles.summaryRow}><span>Tutarlılık</span><strong style={{color:'#f57f17'}}>%{result.groq_consistency}</strong></div>
+              </div>
             </div>
-            <div style={styles.aiCard}>
-              <div style={styles.cardTitle}>🤖 Gemini & Groq</div>
-              <ul style={styles.list}>
-                <li>Genel amaçlı AI</li>
-                <li>Her seferinde farklı cevap</li>
-                <li>Kaynak gösteremiyor</li>
-                <li>Hallüsinasyon yapabilir</li>
-                <li>Ortalama 1-3 saniye</li>
-              </ul>
-            </div>
-          </div>
-        </div>
 
-        <div style={styles.section}>
-          <div style={styles.sectionLabel}>NASIL YAPILIR?</div>
-          <div style={styles.steps}>
-            <div style={styles.step}>
-              <div style={styles.stepNum}>1</div>
-              <div style={styles.stepText}>Analiz sayfasına git ve ilaçlarını gir</div>
+            {/* GRAFİKLER */}
+            <div style={styles.section}>
+              <div style={styles.sectionLabel}>GRAFİKLER</div>
+              <div style={styles.chartsGrid}>
+                <div style={styles.chartBox}>
+                  <img src={`http://localhost:5000/benchmark/charts/speed_chart.png?t=${Date.now()}`}
+                    alt="Hız karşılaştırması" style={styles.chartImg}
+                    onError={(e) => e.target.style.display='none'} />
+                </div>
+                <div style={styles.chartBox}>
+                  <img src={`http://localhost:5000/benchmark/charts/consistency_chart.png?t=${Date.now()}`}
+                    alt="Tutarlılık" style={styles.chartImg}
+                    onError={(e) => e.target.style.display='none'} />
+                </div>
+                <div style={styles.chartBox}>
+                  <img src={`http://localhost:5000/benchmark/charts/warnings_chart.png?t=${Date.now()}`}
+                    alt="Uyarı sayısı" style={styles.chartImg}
+                    onError={(e) => e.target.style.display='none'} />
+                </div>
+              </div>
             </div>
-            <div style={styles.step}>
-              <div style={styles.stepNum}>2</div>
-              <div style={styles.stepText}>Analiz Et butonuna bas, sonuçları gör</div>
-            </div>
-            <div style={styles.step}>
-              <div style={styles.stepNum}>3</div>
-              <div style={styles.stepText}>Sonuç sayfasındaki "AI ile Karşılaştır" butonuna bas</div>
-            </div>
-            <div style={styles.step}>
-              <div style={styles.stepNum}>4</div>
-              <div style={styles.stepText}>Sistemimiz aynı soruyu Gemini ve Groq'a 5 kez sorar, karşılaştırır</div>
-            </div>
-          </div>
-        </div>
 
-        <div style={styles.section}>
-          <div style={styles.sectionLabel}>NE ÖLÇÜLÜR?</div>
-          <div style={styles.metricsGrid}>
-            <div style={styles.metricCard}>
-              <div style={styles.metricIcon}>⚡</div>
-              <div style={styles.metricName}>Hız</div>
-              <div style={styles.metricDesc}>Kaç saniyede cevap verdi?</div>
+            {/* UYARI DETAYLARI */}
+            <div style={styles.section}>
+              <div style={styles.sectionLabel}>UYARI DETAYLARI</div>
+              <div style={styles.cardsGrid}>
+                <div style={styles.card}>
+                  <div style={styles.cardTitle}>Psy-Med Advisor</div>
+                  <div style={styles.warningList}>
+                    {result.our_result?.map((w, i) => (
+                      <div key={i} style={{...styles.warningItem, borderLeft: '3px solid #1D9E75'}}>
+                        {typeof w === 'string' ? w : `${w.drugs?.[0]} + ${w.drugs?.[1]}: ${w.shared_pathway}`}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div style={styles.card}>
+                  <div style={styles.cardTitle}>Gemini</div>
+                  <div style={styles.warningList}>
+                    {result.gemini_result?.map((w, i) => (
+                      <div key={i} style={{...styles.warningItem, borderLeft: '3px solid #378ADD'}}>{w}</div>
+                    ))}
+                  </div>
+                </div>
+                <div style={styles.card}>
+                  <div style={styles.cardTitle}>Groq</div>
+                  <div style={styles.warningList}>
+                    {result.groq_result?.map((w, i) => (
+                      <div key={i} style={{...styles.warningItem, borderLeft: '3px solid #D85A30'}}>{w}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div style={styles.metricCard}>
-              <div style={styles.metricIcon}>🎯</div>
-              <div style={styles.metricName}>Doğruluk</div>
-              <div style={styles.metricDesc}>Doğru uyarıları verdi mi?</div>
-            </div>
-            <div style={styles.metricCard}>
-              <div style={styles.metricIcon}>🔄</div>
-              <div style={styles.metricName}>Tutarlılık</div>
-              <div style={styles.metricDesc}>5 denemede aynı cevabı verdi mi?</div>
-            </div>
-            <div style={styles.metricCard}>
-              <div style={styles.metricIcon}>🚫</div>
-              <div style={styles.metricName}>Hallüsinasyon</div>
-              <div style={styles.metricDesc}>Olmayan uyarı üretildi mi?</div>
-            </div>
-          </div>
-        </div>
 
-        <button style={styles.button} onClick={() => navigate('/analyze')}>
-          Analize Git →
-        </button>
-
+            <button style={styles.button} onClick={() => navigate('/analyze')}>Yeni Analiz →</button>
+          </>
+        )}
       </div>
     </div>
   );
@@ -99,25 +124,28 @@ function Benchmark() {
 
 const styles = {
   page: { backgroundColor: '#f5f0eb', minHeight: '100vh', padding: '2rem' },
-  container: { maxWidth: '700px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' },
-  title: { textAlign: 'center', color: '#1a3d2b', fontSize: '1.8rem', fontWeight: '700' },
-  intro: { textAlign: 'center', color: '#4b5563', fontSize: '1rem', lineHeight: '1.7' },
-  section: { backgroundColor: 'white', borderRadius: '12px', padding: '1.25rem', border: '0.5px solid #e5e7eb' },
-  sectionLabel: { fontSize: '0.75rem', fontWeight: '700', color: '#6b7280', letterSpacing: '1px', marginBottom: '1rem' },
-  compareGrid: { display: 'flex', gap: '1rem' },
-  ourCard: { flex: 1, backgroundColor: '#f0fff4', borderRadius: '8px', padding: '1rem', border: '1px solid #9ae6b4' },
-  aiCard: { flex: 1, backgroundColor: '#fffbeb', borderRadius: '8px', padding: '1rem', border: '1px solid #f6e05e' },
-  cardTitle: { fontWeight: '700', fontSize: '1rem', color: '#1a3d2b', marginBottom: '0.8rem' },
-  list: { paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.4rem', fontSize: '0.9rem', color: '#4b5563' },
+  container: { maxWidth: '1000px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' },
+  title: { fontSize: '1.8rem', fontWeight: '700', color: '#1a3d2b', margin: 0 },
+  intro: { color: '#4b5563', fontSize: '1rem', lineHeight: '1.7' },
+  drugsBox: { backgroundColor: 'white', borderRadius: '8px', padding: '0.8rem 1.25rem', border: '0.5px solid #e5e7eb', fontSize: '0.95rem', color: '#6b7280' },
+  smallLabel: { fontSize: '0.75rem', fontWeight: '700', letterSpacing: '1px' },
+  summaryGrid: { display: 'flex', gap: '1rem' },
+  summaryCard: { flex: 1, backgroundColor: 'white', borderRadius: '12px', padding: '1.25rem', border: '0.5px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: '0.6rem' },
+  summaryTitle: { fontWeight: '700', fontSize: '1rem', color: '#1a3d2b', marginBottom: '0.3rem' },
+  summaryRow: { display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem', color: '#4b5563' },
+  section: { backgroundColor: 'white', borderRadius: '12px', padding: '1.5rem', border: '0.5px solid #e5e7eb', boxShadow: '0 2px 8px rgba(0,0,0,0.06)' },
+  sectionLabel: { fontSize: '0.75rem', fontWeight: '700', color: '#6b7280', letterSpacing: '1px', marginBottom: '1rem', display: 'block' },
+  chartsGrid: { display: 'flex', gap: '1rem', flexWrap: 'wrap', justifyContent: 'center' },
+  chartBox: { flex: 1, minWidth: '260px', maxWidth: '340px' },
+  chartImg: { width: '100%', borderRadius: '8px', border: '0.5px solid #e5e7eb' },
+  cardsGrid: { display: 'flex', gap: '1rem' },
+  card: { flex: 1, backgroundColor: '#f8fafb', borderRadius: '8px', padding: '1rem' },
+  cardTitle: { fontWeight: '700', fontSize: '0.95rem', color: '#1a3d2b', marginBottom: '0.8rem' },
+  warningList: { display: 'flex', flexDirection: 'column', gap: '0.4rem' },
+  warningItem: { fontSize: '0.8rem', color: '#4b5563', backgroundColor: 'white', padding: '0.4rem 0.6rem', borderRadius: '6px' },
   steps: { display: 'flex', flexDirection: 'column', gap: '0.8rem' },
-  step: { display: 'flex', alignItems: 'center', gap: '1rem' },
+  step: { display: 'flex', alignItems: 'center', gap: '1rem', fontSize: '0.95rem', color: '#4b5563' },
   stepNum: { width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#2d6a4f', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', flexShrink: 0 },
-  stepText: { fontSize: '0.95rem', color: '#4b5563' },
-  metricsGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' },
-  metricCard: { backgroundColor: '#f8fafb', borderRadius: '8px', padding: '1rem', textAlign: 'center' },
-  metricIcon: { fontSize: '1.5rem', marginBottom: '0.4rem' },
-  metricName: { fontWeight: '700', fontSize: '0.95rem', color: '#1a3d2b', marginBottom: '0.3rem' },
-  metricDesc: { fontSize: '0.85rem', color: '#6b7280' },
   button: { padding: '0.9rem', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer' },
 };
 

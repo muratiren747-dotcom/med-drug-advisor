@@ -23,7 +23,7 @@ function Sidebar() {
   return (
     <div style={styles.sidebar}>
       <div style={styles.logo}>
-        <span style={styles.logoIcon}>💊</span>
+        <span style={styles.logoIcon}></span>
         <span style={styles.logoText}>Psy-Med</span>
       </div>
 

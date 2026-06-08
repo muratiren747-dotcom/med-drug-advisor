@@ -27,7 +27,7 @@ function Dashboard() {
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-        <h2 style={styles.title}>Merhaba, {username} 👋</h2>
+        <h2 style={styles.title}>Merhaba, {username} !</h2>
         <p style={styles.subtitle}>Bugün nasılsın?</p>
 
         <div style={styles.cardGrid}>
@@ -54,7 +54,7 @@ function Dashboard() {
             {history.slice(0, 3).map((item, i) => (
               <div key={i} style={styles.recentCard} onClick={() => navigate('/history')}>
                 <div style={styles.recentDrugs}>
-                  💊 {item.analysis_result?.drugs?.join(' + ') || '—'}
+                   {item.analysis_result?.drugs?.join(' + ') || '—'}
                 </div>
                 <div style={styles.recentMeta}>
                   <span style={styles.recentDate}>

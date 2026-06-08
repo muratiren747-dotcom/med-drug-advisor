@@ -29,21 +29,60 @@ def check_pathway_conflict(drug_list):
     """
     Given a list of Drug objects, finds shared metabolic pathways
     (CYP enzymes) or receptor overlaps that could cause interactions or conflicts.
-
-    :param drug_list: list[Drug]
-    :return: list of dicts, e.g.
-             [{"drugs": ("Sertraline", "Fluoxetine"),
-               "shared_pathway": ["CYP2D6"],
-               "severity": "caution"}]
     """
-    # MOCK
     if len(drug_list) < 2:
         return []
-    return [{
-        "drugs": (drug_list[0].name, drug_list[1].name),
-        "shared_pathway": ["CYP2D6"],
-        "severity": "CAUTION"
-    }]
+
+    conflicts = []
+    from itertools import combinations
+
+    for drug_a, drug_b in combinations(drug_list, 2):
+        shared = [p for p in drug_a.pathway if p in drug_b.pathway]
+        if shared:
+            # Determine severity based on pathway
+            if "CYP2D6" in shared or "CYP3A4" in shared:
+                severity = "DANGER"
+            else:
+                severity = "CAUTION"
+
+            # Build explanation based on shared pathway
+            pathway_explanations = {
+                "CYP2D6": "Both drugs compete for the CYP2D6 enzyme in the liver. This can slow down metabolism, leading to increased drug levels in the blood and higher risk of side effects.",
+                "CYP3A4": "Both drugs are metabolized by CYP3A4. Co-administration may alter drug concentrations significantly.",
+                "CYP2C19": "Both drugs use CYP2C19 for metabolism. This may reduce the effectiveness of one or both drugs.",
+                "CYP1A2": "Both drugs are processed by CYP1A2. Combining them may affect metabolism rates.",
+                "CYP2C9": "Both drugs share the CYP2C9 pathway, which may lead to altered drug levels.",
+            }
+
+            explanation = " / ".join([
+                pathway_explanations.get(p, f"Both drugs share the {p} metabolic pathway.")
+                for p in shared
+            ])
+
+            # Symptoms to watch based on pathway
+            pathway_symptoms = {
+                "CYP2D6": ["agitation", "rapid heart rate", "high fever", "muscle twitching", "excessive sweating"],
+                "CYP3A4": ["dizziness", "nausea", "unusual sedation", "heart palpitations"],
+                "CYP2C19": ["nausea", "headache", "dizziness"],
+                "CYP1A2": ["tremor", "agitation", "insomnia"],
+                "CYP2C9": ["bleeding", "bruising", "dizziness"],
+            }
+
+            symptoms = []
+            for p in shared:
+                symptoms.extend(pathway_symptoms.get(p, []))
+            symptoms = list(dict.fromkeys(symptoms))  # remove duplicates
+
+            conflicts.append({
+                "drugs": (drug_a.name, drug_b.name),
+                "shared_pathway": shared,
+                "severity": severity,
+                "explanation": explanation,
+                "symptoms_to_watch": symptoms,
+                "action": "Consult your doctor before combining these medications. Do not stop taking them without medical advice."
+            })
+
+    return conflicts
 
 def check_food_interactions(drug_obj):
     """
