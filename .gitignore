@@ -1,5 +1,17 @@
+# Backend (Python)
 __pycache__/
+*.py[cod]
+venv/
+.venv/
+*.sqlite
 *.db
 .env
-venv/
+
+# Editors / OS
 .idea/
+.vscode/
+.DS_Store
+
+# Test artifacts
+cookies.txt
+login.json
