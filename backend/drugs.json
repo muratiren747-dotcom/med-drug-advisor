@@ -1,6 +1,7 @@
 [
   {
     "name": "Sertraline",
+    "drug_class": "SSRI",
     "pathway": [
       "CYP3A4",
       "CYP2B6",
@@ -14,10 +15,16 @@
       "CYP2D6"
     ],
     "cyp_inhibits": [
-      "CYP2D6"
+      "CYP2D6",
+      "CYP2C19",
+      "CYP3A4",
+      "CYP2C9"
     ],
     "cyp_inhibits_strength": {
-      "CYP2D6": "weak"
+      "CYP2D6": "weak",
+      "CYP2C19": "weak",
+      "CYP3A4": "weak",
+      "CYP2C9": "weak"
     },
     "max_dose": 200,
     "food_interactions": [
@@ -43,6 +50,7 @@
   },
   {
     "name": "Fluoxetine",
+    "drug_class": "SSRI",
     "pathway": [
       "CYP2D6",
       "CYP2C9",
@@ -57,11 +65,15 @@
     ],
     "cyp_inhibits": [
       "CYP2D6",
-      "CYP2C19"
+      "CYP2C19",
+      "CYP2C9",
+      "CYP3A4"
     ],
     "cyp_inhibits_strength": {
       "CYP2D6": "strong",
-      "CYP2C19": "moderate"
+      "CYP2C19": "moderate",
+      "CYP2C9": "moderate",
+      "CYP3A4": "weak"
     },
     "max_dose": 80,
     "food_interactions": [
@@ -87,6 +99,7 @@
   },
   {
     "name": "Escitalopram",
+    "drug_class": "SSRI",
     "pathway": [
       "CYP2C19",
       "CYP3A4",
@@ -127,6 +140,7 @@
   },
   {
     "name": "Paroxetine",
+    "drug_class": "SSRI",
     "pathway": [
       "CYP2D6"
     ],
@@ -134,10 +148,16 @@
       "CYP2D6"
     ],
     "cyp_inhibits": [
-      "CYP2D6"
+      "CYP2D6",
+      "CYP2B6",
+      "CYP3A4",
+      "CYP2C19"
     ],
     "cyp_inhibits_strength": {
-      "CYP2D6": "strong"
+      "CYP2D6": "strong",
+      "CYB2B6": "moderate",
+      "CYP3A4": "weak",
+      "CYP2C19": "weak"
     },
     "max_dose": 60,
     "food_interactions": [
@@ -163,6 +183,7 @@
   },
   {
     "name": "Venlafaxine",
+    "drug_class": "SNRI",
     "pathway": [
       "CYP2D6",
       "CYP3A4"
@@ -202,6 +223,7 @@
   },
   {
     "name": "Duloxetine",
+    "drug_class": "SNRI",
     "pathway": [
       "CYP1A2",
       "CYP2D6"
@@ -239,6 +261,7 @@
   },
   {
     "name": "Bupropion",
+    "drug_class": "NDRI",
     "pathway": [
       "CYP2B6"
     ],
@@ -274,6 +297,7 @@
   },
   {
     "name": "Mirtazapine",
+    "drug_class": "NaSSA",
     "pathway": [
       "CYP1A2",
       "CYP2D6",
@@ -310,6 +334,7 @@
   },
   {
     "name": "Trazodone",
+    "drug_class": "SARI",
     "pathway": [
       "CYP3A4"
     ],
@@ -339,6 +364,7 @@
   },
   {
     "name": "Quetiapine",
+    "drug_class": "Atypical Antipsychotic",
     "pathway": [
       "CYP3A4"
     ],
@@ -372,6 +398,7 @@
   },
   {
     "name": "Aripiprazole",
+    "drug_class": "Atypical Antipsychotic",
     "pathway": [
       "CYP2D6",
       "CYP3A4"
@@ -405,6 +432,7 @@
   },
   {
     "name": "Olanzapine",
+    "drug_class": "Atypical Antipsychotic",
     "pathway": [
       "CYP1A2",
       "CYP2D6"
@@ -439,6 +467,7 @@
   },
   {
     "name": "Lithium",
+    "drug_class": "Mood Stabilizer",
     "pathway": [
       "RENAL"
     ],
@@ -470,6 +499,7 @@
   },
   {
     "name": "Valproate",
+    "drug_class": "Mood Stabilizer",
     "pathway": [
       "CYP2C9",
       "CYP2C19"
@@ -478,8 +508,12 @@
       "CYP2C9",
       "CYP2C19"
     ],
-    "cyp_inhibits": [],
-    "cyp_inhibits_strength": {},
+    "cyp_inhibits": [
+      "CYP2C9"
+    ],
+    "cyp_inhibits_strength": {
+      "CYP2C9": "weak"
+    },
     "max_dose": 2000,
     "food_interactions": [
       "alcohol"
@@ -504,6 +538,7 @@
   },
   {
     "name": "Diazepam",
+    "drug_class": "Benzodiazepine",
     "pathway": [
       "CYP2C19",
       "CYP3A4"
