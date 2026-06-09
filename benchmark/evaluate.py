@@ -128,30 +128,13 @@ def measure_consistency(results_list):
     return round(frozen.count(most_common) / len(frozen) * 100, 1)
 
 
-def run_single_benchmark(drug_entries, patient_data, our_result):
-    gemini_runs, gemini_times = [], []
-    for _ in range(NUM_RUNS):
-        result, t = call_gemini(drug_entries, patient_data)
-        gemini_runs.append(result)
-        gemini_times.append(t)
-
-    groq_runs, groq_times = [], []
-    for _ in range(NUM_RUNS):
-        result, t = call_groq(drug_entries, patient_data)
-        groq_runs.append(result)
-        groq_times.append(t)
-
-    return {
-        "our_result": our_result,
-        "our_time": 0.02,
-        "gemini_result": gemini_runs[0],
-        "gemini_time": round(sum(gemini_times) / NUM_RUNS, 3),
-        "gemini_consistency": measure_consistency(gemini_runs),
-        "groq_result": groq_runs[0],
-        "groq_time": round(sum(groq_times) / NUM_RUNS, 3),
-        "groq_consistency": measure_consistency(groq_runs),
-    }
-
+def run_our_system(drug_entries, patient_data):
+    drug_db = load_drug_database(DRUGS_JSON)
+    patient = Patient(...)
+    drug_objects = [drug_db[name] for name in drug_entries if name in drug_db]
+    daily_doses = {name: patient_data.get("daily_doses", {}).get(name, 100) for name in drug_entries}
+    result = analyze(patient, drug_objects, daily_doses)
+    return result
 
 if __name__ == "__main__":
     drug_entries = ["Sertraline", "Fluoxetine"]
