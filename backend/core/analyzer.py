@@ -20,9 +20,15 @@ MIN_AGE = 18                # tool is meant for adults only
 # severity order, most serious first (used for sorting/counting later)
 SEVERITY_ORDER = {"DANGER": 0, "CAUTION": 1, "INFO": 2}
 
+# Weight scoring for cumulative enzyme inhibition
+INHIBITION_WEIGHTS = {
+    "strong": 3.0,
+    "moderate": 2.0,
+    "weak": 1.0
+}
+
 
 # --- reference tables ---
-# these classify the drugs; could be moved into drugs.json later if the list grows
 
 # why each food is a problem, in plain words
 FOOD_EXPLANATIONS = {
@@ -31,32 +37,6 @@ FOOD_EXPLANATIONS = {
     "caffeine": "can change how the drug is cleared from your body and may increase restlessness.",
     "tyramine": "can trigger a dangerous rise in blood pressure (hypertensive crisis).",
     "low_sodium_diet": "low salt intake raises lithium levels in your blood; keep your salt intake steady.",
-}
-
-# how strong an inhibition is -> how serious the interaction is
-STRENGTH_TO_SEVERITY = {
-    "strong": "DANGER",
-    "moderate": "CAUTION",
-    "weak": "INFO",
-}
-
-# drug name -> its class, used to catch two drugs from the same class
-DRUG_CLASSES = {
-    "Sertraline": "SSRI",
-    "Fluoxetine": "SSRI",
-    "Escitalopram": "SSRI",
-    "Paroxetine": "SSRI",
-    "Venlafaxine": "SNRI",
-    "Duloxetine": "SNRI",
-    "Bupropion": "NDRI",
-    "Mirtazapine": "NaSSA",
-    "Trazodone": "SARI",
-    "Quetiapine": "Atypical Antipsychotic",
-    "Aripiprazole": "Atypical Antipsychotic",
-    "Olanzapine": "Atypical Antipsychotic",
-    "Lithium": "Mood Stabilizer",
-    "Valproate": "Mood Stabilizer",
-    "Diazepam": "Benzodiazepine",
 }
 
 # drugs that raise serotonin; two or more together is the serotonin syndrome risk
@@ -128,43 +108,116 @@ def check_dose_safety(patient_obj, drug_obj, daily_dose):
     return f"INFO: {daily_dose}mg is within the safe range for {drug_obj.name}."
 
 
-# --- 2. drug-drug CYP interactions ---
+# --- 2. cumulative drug-drug CYP interactions O(N) ---
 
-def check_pathway_conflict(drug_list):
-    """Looks at every pair of drugs and finds CYP inhibitor/substrate clashes."""
-    conflicts = []
+def check_cumulative_pathway_conflict(drug_list, doses):
+    """
+    Calculates dynamic, cumulative inhibitory burden per enzyme in O(N) linear time.
+    Scales perpetrator scores by current dose / max dose.
+    """
+    warnings = []
     if len(drug_list) < 2:
-        return conflicts
+        return warnings
 
-    for i in range(len(drug_list)):
-        for j in range(i + 1, len(drug_list)):
-            drug_a = drug_list[i]
-            drug_b = drug_list[j]
-            conflicts.extend(_find_inhibition(drug_a, drug_b))
-            conflicts.extend(_find_inhibition(drug_b, drug_a))
+    substrate_map = {}
+    burden_map = {}
 
-    return conflicts
+    # Step A: Index substrates and calculate dose-scaled inhibition burdens
+    for drug in drug_list:
+        for enzyme in drug.cyp_substrate:
+            if enzyme not in substrate_map:
+                substrate_map[enzyme] = []
+            substrate_map[enzyme].append(drug.name)
+            
+        for enzyme in drug.cyp_inhibits:
+            if enzyme not in burden_map:
+                burden_map[enzyme] = {"total_score": 0.0, "perps_list": []}
+                
+            strength = drug.cyp_inhibits_strength.get(enzyme, "weak")
+            base_score = INHIBITION_WEIGHTS.get(strength, 1.0)
+            current_dose = doses.get(drug.name, 0)
+            
+            if drug.max_dose > 0 and current_dose > 0:
+                dose_ratio = current_dose / drug.max_dose
+                adjusted_score = base_score * dose_ratio
+            else:
+                adjusted_score = base_score
+                
+            burden_map[enzyme]["total_score"] += adjusted_score
+            burden_map[enzyme]["perps_list"].append(f"{drug.name} ({adjusted_score:.1f} pts)")
 
+    # Step B: Evaluate the collective burden on each intersection
+    for enzyme, burden in burden_map.items():
+        total_burden = burden["total_score"]
+        
+        if total_burden >= 1.0 and enzyme in substrate_map:
+            victims = substrate_map[enzyme]
+            perpetrators = burden["perps_list"]
+            
+            # Clean skip: prevent a multi-pathway drug from flagging an interaction with itself
+            if len(victims) == 1 and len(perpetrators) == 1:
+                if victims[0] == perpetrators[0].split(" ")[0]:
+                    continue
 
-def _find_inhibition(inhibitor, substrate_drug):
-    """Finds enzymes the first drug blocks that the second drug needs to be broken down."""
-    found = []
-    for enzyme in inhibitor.cyp_inhibits:
-        if enzyme in substrate_drug.cyp_substrate:
-            strength = inhibitor.cyp_inhibits_strength.get(enzyme, "weak")
-            severity = STRENGTH_TO_SEVERITY.get(strength, "CAUTION")
+            if total_burden >= 3.0:
+                severity = "DANGER"
+                impact = "severe accumulation and potential toxicity"
+            elif total_burden >= 2.0:
+                severity = "CAUTION"
+                impact = "moderate accumulation"
+            else:
+                severity = "INFO"
+                impact = "mild accumulation"
+
+            victims_str = ", ".join(victims)
+            perps_str = ", ".join(perpetrators)
+
             explanation = (
-                f"{inhibitor.name} blocks {enzyme}, the enzyme that breaks down "
-                f"{substrate_drug.name}. This can make {substrate_drug.name} build up "
-                f"in the blood and increase its side effects."
+                f"Cumulative Dose-Adjusted {enzyme} Inhibition: {perps_str} creates a total inhibition "
+                f"burden of {total_burden:.1f}. This blocks the clearance of {victims_str}, "
+                f"risking {impact}."
             )
-            found.append({
-                "drugs": (inhibitor.name, substrate_drug.name),
-                "shared_pathway": [enzyme],
+
+            warnings.append({
                 "severity": severity,
-                "explanation": explanation,
+                "explanation": explanation
             })
-    return found
+
+    return warnings
+
+
+# --- 2b. substrate saturation checker O(N) ---
+
+def check_substrate_saturation(drug_list):
+    """
+    Checks for competitive enzyme overload. Triggered when multiple drugs compete 
+    as substrates for the same pathway, even if no direct inhibitor is present.
+    """
+    warnings = []
+    if len(drug_list) < 2:
+        return warnings
+
+    enzyme_counts = {}
+    for drug in drug_list:
+        for enzyme in drug.cyp_substrate:
+            if enzyme not in enzyme_counts:
+                enzyme_counts[enzyme] = []
+            enzyme_counts[enzyme].append(drug.name)
+
+    for enzyme, drugs in enzyme_counts.items():
+        if len(drugs) >= 2:
+            joined_drugs = ", ".join(drugs)
+            explanation = (
+                f"Competitive {enzyme} Saturation: {joined_drugs} are all substrates relying "
+                f"on the same pathway. Even without direct inhibitors, these drugs will compete "
+                f"for clearance, potentially slowing down metabolism at higher doses."
+            )
+            warnings.append({
+                "severity": "INFO",
+                "explanation": explanation
+            })
+
+    return warnings
 
 
 # --- 3. food interactions ---
@@ -212,7 +265,6 @@ def check_serotonin_syndrome(patient_obj, drug_list):
     serotonergic = [d.name for d in drug_list if d.name in SEROTONERGIC_DRUGS]
     on_maoi = LIFESTYLE_MAOI in _lifestyle_flags(patient_obj)
 
-    # MAOI plus any serotonergic drug is the worst case
     if on_maoi and serotonergic:
         names = ", ".join(serotonergic)
         return [
@@ -233,14 +285,15 @@ def check_serotonin_syndrome(patient_obj, drug_list):
     ]
 
 
-# --- 6. same-class duplication ---
+# --- 6. same-class duplication (Dynamic JSON Version) ---
 
 def check_therapeutic_duplication(drug_list):
-    """Groups the drugs by class and warns if any class shows up more than once."""
+    """Groups the drugs by class fetched dynamically from the object model and warns if duplication exists."""
     warnings = []
     class_map = {}
     for drug in drug_list:
-        drug_class = DRUG_CLASSES.get(drug.name, "Unknown")
+        # Fetches drug_class dynamically from JSON profile instead of global script dict
+        drug_class = getattr(drug, "drug_class", "Unknown")
         class_map.setdefault(drug_class, []).append(drug.name)
 
     for drug_class, names in class_map.items():
@@ -259,7 +312,6 @@ def check_additive_side_effects(drug_list, patient_obj):
     """Warns when two or more drugs share the same risky side effect."""
     warnings = []
 
-    # the general groups
     for group_name, effect_set in SIDE_EFFECT_GROUPS.items():
         offenders = [d.name for d in drug_list if set(d.side_effects) & effect_set]
         if len(offenders) >= 2:
@@ -269,7 +321,6 @@ def check_additive_side_effects(drug_list, patient_obj):
                 f"{group_name}. Combined, this effect is stronger."
             )
 
-    # anticholinergic effects, worse for the elderly
     anticholinergic = [d.name for d in drug_list
                        if set(d.side_effects) & ANTICHOLINERGIC_EFFECTS]
     if len(anticholinergic) >= 2:
@@ -321,12 +372,7 @@ def check_sex_specific_risks(patient_obj, drug_list):
 # --- 10. lifestyle (smoking / alcohol) ---
 
 def check_lifestyle_interactions(patient_obj, drug_list):
-    """Checks smoking and alcohol against the drug list.
-
-    Smoking speeds up CYP1A2, so any CYP1A2 substrate is affected. We read the
-    affected drugs straight from each drug's cyp_substrate list instead of keeping
-    a separate name list, so new drugs are covered automatically.
-    """
+    """Checks smoking and alcohol against the drug list."""
     warnings = []
     flags = _lifestyle_flags(patient_obj)
 
@@ -369,16 +415,14 @@ def check_age_eligibility(patient_obj):
 # --- main entry point: run everything ---
 
 def analyze(patient_obj, drug_list, doses):
-    """Runs all the checks and puts the results in one dictionary.
-
-    doses is a dict of drug name -> daily dose. This is what the API route calls.
-    """
+    """Runs all the checks and puts the results in one dictionary."""
     report = {
         "drug_profiles": [],
         "dose_assessments": [],
         "food_warnings": [],
         "patient_risks": [],
         "interactions": [],
+        "substrate_saturation": [],
         "serotonin_syndrome": [],
         "therapeutic_duplication": [],
         "additive_side_effects": [],
@@ -399,7 +443,8 @@ def analyze(patient_obj, drug_list, doses):
         report["patient_risks"].extend(check_patient_risks(patient_obj, drug))
 
     # checks that need the whole list / patient
-    report["interactions"] = check_pathway_conflict(drug_list)
+    report["interactions"] = check_cumulative_pathway_conflict(drug_list, doses)
+    report["substrate_saturation"] = check_substrate_saturation(drug_list)
     report["serotonin_syndrome"] = check_serotonin_syndrome(patient_obj, drug_list)
     report["therapeutic_duplication"] = check_therapeutic_duplication(drug_list)
     report["additive_side_effects"] = check_additive_side_effects(drug_list, patient_obj)
@@ -413,8 +458,6 @@ def analyze(patient_obj, drug_list, doses):
 
 # --- report helpers ---
 
-# the text sections of the report, in print order.
-# add a new check here and it shows up in the report automatically.
 REPORT_SECTIONS = [
     ("DOSE ASSESSMENT", "dose_assessments"),
     ("SEROTONIN SYNDROME RISK", "serotonin_syndrome"),
@@ -434,9 +477,13 @@ def collect_warnings(report):
     all_warnings = []
     for _, key in REPORT_SECTIONS:
         all_warnings.extend(report.get(key, []))
-    # interactions are dicts, so turn them into strings too
+        
     for interaction in report.get("interactions", []):
         all_warnings.append(f"{interaction['severity']}: {interaction['explanation']}")
+        
+    for saturation in report.get("substrate_saturation", []):
+        all_warnings.append(f"{saturation['severity']}: {saturation['explanation']}")
+        
     return all_warnings
 
 
@@ -451,11 +498,7 @@ def summarize_severity(report):
 # --- write the report to a text file ---
 
 def generate_report(report, patient_obj, output_path="analysis_report.txt"):
-    """Turns the report dict into a readable .txt file.
-
-    Starts with a count summary and the DANGER warnings on their own, then prints
-    every section in full. Returns the file path, or an error message if it can't write.
-    """
+    """Turns the report dict into a readable .txt file."""
     counts = summarize_severity(report)
     all_warnings = collect_warnings(report)
     critical = [w for w in all_warnings if _severity_of(w) == "DANGER"]
@@ -473,7 +516,6 @@ def generate_report(report, patient_obj, output_path="analysis_report.txt"):
                  f"{counts['CAUTION']} caution, {counts['INFO']} info")
     lines.append("")
 
-    # show the dangerous ones first so they don't get lost
     lines.append("-" * 60)
     lines.append("CRITICAL WARNINGS")
     lines.append("-" * 60)
@@ -484,7 +526,6 @@ def generate_report(report, patient_obj, output_path="analysis_report.txt"):
         lines.append("  No critical (DANGER-level) warnings.")
     lines.append("")
 
-    # the drugs we looked at
     lines.append("-" * 60)
     lines.append("DRUGS ANALYZED")
     lines.append("-" * 60)
@@ -492,9 +533,8 @@ def generate_report(report, patient_obj, output_path="analysis_report.txt"):
         lines.append(f"  - {profile['name']} (pathway: {', '.join(profile['pathway'])})")
     lines.append("")
 
-    # interactions are dicts so they print a bit differently
     lines.append("-" * 60)
-    lines.append("DRUG-DRUG INTERACTIONS")
+    lines.append("DRUG-DRUG INTERACTIONS (CUMULATIVE PATHWAYS)")
     lines.append("-" * 60)
     interactions = report.get("interactions", [])
     if interactions:
@@ -504,7 +544,17 @@ def generate_report(report, patient_obj, output_path="analysis_report.txt"):
         lines.append("  None.")
     lines.append("")
 
-    # the rest of the sections
+    lines.append("-" * 60)
+    lines.append("COMPETITIVE SUBSTRATE SATURATION")
+    lines.append("-" * 60)
+    saturations = report.get("substrate_saturation", [])
+    if saturations:
+        for item in saturations:
+            lines.append(f"  [{item['severity']}] {item['explanation']}")
+    else:
+        lines.append("  None.")
+    lines.append("")
+
     for title, key in REPORT_SECTIONS:
         items = report.get(key, [])
         lines.append("-" * 60)
