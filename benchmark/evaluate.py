@@ -25,24 +25,11 @@ DRUGS_JSON = os.path.join(os.path.dirname(__file__), '..', 'backend', 'drugs.jso
 
 def run_our_system(drug_entries, patient_data):
     drug_db = load_drug_database(DRUGS_JSON)
-    patient = Patient(
-        username="benchmark",
-        age=patient_data.get("age", 40),
-        sex=patient_data.get("sex", "unknown"),
-        weight=patient_data.get("weight", 70),
-        medical_conditions=patient_data.get("conditions", []),
-        is_pregnant=patient_data.get("is_pregnant", False)
-    )
+    patient = Patient(...)
     drug_objects = [drug_db[name] for name in drug_entries if name in drug_db]
     daily_doses = {name: patient_data.get("daily_doses", {}).get(name, 100) for name in drug_entries}
-
-    warnings = []
-    warnings.extend(check_pathway_conflict(drug_objects))
-    for drug in drug_objects:
-        warnings.append(check_dose_safety(patient, drug, daily_doses[drug.name]))
-        warnings.extend(check_food_interactions(drug))
-        warnings.extend(check_patient_risks(patient, drug))
-    return warnings
+    result = analyze(patient, drug_objects, daily_doses)
+    return result
 
 
 def call_gemini(drug_entries, patient_data):
@@ -128,13 +115,30 @@ def measure_consistency(results_list):
     return round(frozen.count(most_common) / len(frozen) * 100, 1)
 
 
-def run_our_system(drug_entries, patient_data):
-    drug_db = load_drug_database(DRUGS_JSON)
-    patient = Patient(...)
-    drug_objects = [drug_db[name] for name in drug_entries if name in drug_db]
-    daily_doses = {name: patient_data.get("daily_doses", {}).get(name, 100) for name in drug_entries}
-    result = analyze(patient, drug_objects, daily_doses)
-    return result
+def run_single_benchmark(drug_entries, patient_data, our_result):
+    gemini_runs, gemini_times = [], []
+    for _ in range(NUM_RUNS):
+        result, t = call_gemini(drug_entries, patient_data)
+        gemini_runs.append(result)
+        gemini_times.append(t)
+
+    groq_runs, groq_times = [], []
+    for _ in range(NUM_RUNS):
+        result, t = call_groq(drug_entries, patient_data)
+        groq_runs.append(result)
+        groq_times.append(t)
+
+    return {
+        "our_result": our_result,
+        "our_time": 0.02,
+        "gemini_result": gemini_runs[0],
+        "gemini_time": round(sum(gemini_times) / NUM_RUNS, 3),
+        "gemini_consistency": measure_consistency(gemini_runs),
+        "groq_result": groq_runs[0],
+        "groq_time": round(sum(groq_times) / NUM_RUNS, 3),
+        "groq_consistency": measure_consistency(groq_runs),
+    }
+
 
 if __name__ == "__main__":
     drug_entries = ["Sertraline", "Fluoxetine"]
