@@ -1,3 +1,14 @@
+"""
+=============================================================================
+Module: auth.py
+Layer : API Routing (Authentication)
+=============================================================================
+Role & Responsibilities:
+- Handles user registration, login, and session clearance operations.
+- Intercepts incoming credentials and passes them to the Data Access Layer.
+- Manages server-side sessions to maintain user state securely.
+=============================================================================
+"""
 from flask import Blueprint, request, jsonify, session
 from core import database_mgr
 
@@ -6,6 +17,13 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
+    """
+    =========================================================================
+    ACCOUNT CREATION ENDPOINT
+    Incoming user data is validated. If credentials are provided, they are
+    delegated to the database manager. 409 Conflict is returned for duplicates.
+    =========================================================================
+    """
     data = request.get_json() or {}
     username = data.get("username")
     password = data.get("password")
@@ -21,6 +39,13 @@ def register():
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
+    """
+    =========================================================================
+    SESSION INITIALIZATION
+    Credentials are authenticated. Upon success, a secure server-side session
+    is instantiated using the user's unique identifier.
+    =========================================================================
+    """
     data = request.get_json() or {}
     patient = database_mgr.login_user(data.get("username"), data.get("password"))
 
