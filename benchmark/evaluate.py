@@ -15,7 +15,7 @@ import ast
 backend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend'))
 sys.path.insert(0, backend_path)
 
-from core.analyzer import check_pathway_conflict, check_dose_safety, check_food_interactions, check_patient_risks
+from core.analyzer import analyze  # check_pathway_conflict yerine daha clean olacak şekilde updatelendi
 from core.database_mgr import load_drug_database
 from core.models import Patient
 
