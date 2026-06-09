@@ -5,6 +5,15 @@ database_mgr.py
 
 SQLite database operations: user accounts, profile storage,
 search history, and loading the drug knowledge base from drugs.json.
+
+=============================================================================
+ARCHITECTURAL ROLE: DATA ACCESS LAYER (DAL)
+=============================================================================
+- Manages pure SQLite3 connections and schema initializations.
+- Enforces strict security through one-way SHA-256 password hashing.
+- Handles all CRUD operations, isolating raw SQL queries from the API layer.
+- Implements right-to-erasure (GDPR/KVKK compliance) via cascading deletions.
+=============================================================================
 """
 import sqlite3
 import hashlib
@@ -23,7 +32,13 @@ def _get_connection(db_name=DB_NAME):
     return connecting_disk
 
 def _hash_password(password):
-    """One-way hashing of passwords using SHA-256 for secure storage."""
+    """
+    =========================================================================
+    SECURITY PROTOCOL
+    Passwords are one-way hashed using SHA-256 prior to database insertion.
+    Plain-text passwords are never stored or logged in the system.
+    =========================================================================
+    """
     return hashlib.sha256(password.encode("utf-8")).hexdigest()
 
 #public functions
@@ -42,9 +57,8 @@ def init_db(db_name = DB_NAME):
     age INTEGER,
     sex TEXT,
     weight REAL,
-    is_pregnant INTEGER DEFAULT 0,
-    medical_conditions TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    is_pregnant BOOLEAN,
+    medical_conditions TEXT
     )""")
 
     cursor.execute("""CREATE TABLE IF NOT EXISTS history(
@@ -52,128 +66,140 @@ def init_db(db_name = DB_NAME):
     username TEXT,
     analysis_result TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (username) REFERENCES users(username) ON DELETE CASCADE
+    FOREIGN KEY(username) REFERENCES users(username) ON DELETE CASCADE
     )""")
-
     con.commit()
     con.close()
 
 def create_user_account(username, password, patient_info):
     """
-    Creates a new user account and stores the hashed passwords and data utilizing the hashlib library.
-    The patient_info dict contains age, sex, weight, medical_conditions.
-
-    :param username: str
-    :param password: str (hashed password)
-    :param patient_info: dict
-    :return: True if successful, False if username already exists
+    Registers a new user. Returns False if username is taken.
     """
     con = _get_connection()
     cursor = con.cursor()
-    try:
-        cursor.execute("""
+
+    # Check if username exists
+    cursor.execute("SELECT username FROM users WHERE username = ?", (username,))
+    if cursor.fetchone():
+        con.close()
+        return False
+
+    hashed = _hash_password(password)
+    med_conds_json = json.dumps(patient_info.get("medical_conditions", []))
+
+    cursor.execute("""
         INSERT INTO users (username, password_hash, age, sex, weight, is_pregnant, medical_conditions)
         VALUES (?, ?, ?, ?, ?, ?, ?)
-        """,(username,
-             _hash_password(password),
-             patient_info.get("age"),
-             patient_info.get("sex"),
-             patient_info.get("weight"),
-             1 if patient_info.get("is_pregnant") else 0,
-             json.dumps(patient_info.get("medical_conditions", []))
-             )
-                       )
-        con.commit()
-        return True
-    except sqlite3.IntegrityError:
-        return False
-    finally:
-        con.close()
-
+    """, (
+        username,
+        hashed,
+        patient_info.get("age"),
+        patient_info.get("sex"),
+        patient_info.get("weight"),
+        patient_info.get("is_pregnant", False),
+        med_conds_json
+    ))
+    con.commit()
+    con.close()
+    return True
 
 def login_user(username, password):
     """
-    Authenticates a user by comparing the hashed password.
-    Returns patient object if authenticated, otherwise None.
+    Validates credentials. If successful, returns a Patient object. Otherwise None.
     """
     con = _get_connection()
     cursor = con.cursor()
-    cursor.execute("SELECT * FROM users WHERE username = ? AND password_hash = ?",
-                   (username, _hash_password(password))
-                   )
+
+    hashed = _hash_password(password)
+    cursor.execute("SELECT * FROM users WHERE username = ? AND password_hash = ?", (username, hashed))
     row = cursor.fetchone()
     con.close()
 
-    if row is None:
-        return None
-
-    conditions = json.loads(row["medical_conditions"]) if row["medical_conditions"] else []
-    return Patient(
-        username=row["username"],
-        age=row["age"],
-        sex=row["sex"],
-        weight=row["weight"],
-        is_pregnant=bool(row["is_pregnant"]),
-        medical_conditions=conditions)
-
+    if row:
+        med_conds = json.loads(row["medical_conditions"]) if row["medical_conditions"] else []
+        return Patient(
+            username=row["username"],
+            age=row["age"],
+            sex=row["sex"],
+            weight=row["weight"],
+            is_pregnant=bool(row["is_pregnant"]),
+            medical_conditions=med_conds
+        )
+    return None
 
 def get_patient(username):
-    """Look up Patient by username only for already authenticated users."""
+    """
+    Retrieves the user's profile and returns a Patient object.
+    """
     con = _get_connection()
     cursor = con.cursor()
     cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
     row = cursor.fetchone()
     con.close()
-    if row is None:
-        return None
-    conditions = json.loads(row["medical_conditions"]) if row["medical_conditions"] else []
-    return Patient(
-        username=row["username"], age=row["age"], sex=row["sex"], weight=row["weight"],
-        is_pregnant=bool(row["is_pregnant"]), medical_conditions=conditions
-    )
+
+    if row:
+        med_conds = json.loads(row["medical_conditions"]) if row["medical_conditions"] else []
+        return Patient(
+            username=row["username"],
+            age=row["age"],
+            sex=row["sex"],
+            weight=row["weight"],
+            is_pregnant=bool(row["is_pregnant"]),
+            medical_conditions=med_conds
+        )
+    return None
 
 def update_user_profile(username, patient_info):
     """
-    Updates the user's medical profile when edited from the Settings page.
+    Updates user demographics/health data. Returns True if updated.
     """
     con = _get_connection()
     cursor = con.cursor()
-    cursor.execute("""
-    UPDATE users SET
-    age = ?, sex = ?, weight = ?, is_pregnant = ?, medical_conditions = ? WHERE username = ?""",
-                   (patient_info.get("age"),
-                    patient_info.get("sex"),
-                    patient_info.get("weight"),
-                    1 if patient_info.get("is_pregnant") else 0,
-                    json.dumps(patient_info.get("medical_conditions", [])),
-                    username
-                    )
-                   )
-    updated = cursor.rowcount > 0
-    con.commit()
-    con.close()
-    return updated
 
-def save_history(username, analysis_result):
+    cursor.execute("SELECT username FROM users WHERE username = ?", (username,))
+    if not cursor.fetchone():
+        con.close()
+        return False
+
+    med_conds_json = json.dumps(patient_info.get("medical_conditions", []))
+    cursor.execute("""
+        UPDATE users
+        SET age = ?, sex = ?, weight = ?, is_pregnant = ?, medical_conditions = ?
+        WHERE username = ?
+    """, (
+        patient_info.get("age"),
+        patient_info.get("sex"),
+        patient_info.get("weight"),
+        patient_info.get("is_pregnant", False),
+        med_conds_json,
+        username
+    ))
+    con.commit()
+    con.close()
+    return True
+
+def save_history(username, analysis_result_dict):
     """
-    Saves the result of one drug analysis to the user's history table,
-    analysis_result is stored as a JSON string for later display.
+    =========================================================================
+    HISTORY PERSISTENCE
+    The normalized analysis payload is serialized into JSON format and permanently
+    stored in the database, linked to the user's session via a Foreign Key.
+    =========================================================================
     """
     con = _get_connection()
     cursor = con.cursor()
-    cursor.execute(
-        "INSERT INTO history (username, analysis_result) VALUES (?, ?)",
-        (username, json.dumps(analysis_result))
-    )
-    new_id = cursor.lastrowid
+
+    res_json = json.dumps(analysis_result_dict)
+    cursor.execute("INSERT INTO history (username, analysis_result) VALUES (?, ?)", (username, res_json))
+    history_id = cursor.lastrowid
+
     con.commit()
     con.close()
-    return new_id
+    return history_id
 
 def get_history(username):
     """
-    Retrieves all past analyses for the given user, ordered newest first.
-    Returns the list of history entries (drug names, timestamp, JSON snapshot)
+    Returns a list of dicts: [{"id": 1, "analysis_result": {...}, "created_at": "..."}]
     """
     con = _get_connection()
     cursor = con.cursor()
@@ -188,8 +214,11 @@ def get_history(username):
 
 def delete_user_account(username):
     """
-    Permanently deletes the user account and all associated history.
-    KVKK / GDPR right-to-erasure compliance.
+    =========================================================================
+    DATA ERASURE (GDPR / KVKK COMPLIANCE)
+    Permanently deletes the user account. Due to the 'ON DELETE CASCADE' constraint
+    in the schema, all associated medical history is automatically purged.
+    =========================================================================
     Triggered from the Settings > Delete My Account button.
     """
     con = _get_connection()
@@ -204,7 +233,7 @@ def load_drug_database(json_path):
     """
     Reads the drug.json knowledge base and returns a dictionary mapping drug name to Drug object.
 
-    :param json_path: "drug.json"
+    :param json_path: "drugs.json"
     :return: dict[str(drug_name), Drug_object]
     """
     with open(json_path, "r", encoding="utf-8") as f:
