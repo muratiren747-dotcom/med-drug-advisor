@@ -202,9 +202,9 @@ def delete_user_account(username):
 
 def load_drug_database(json_path):
     """
-    Reads the drugs.json knowledge base and returns a dictionary mapping drug name to Drug object.
+    Reads the drug.json knowledge base and returns a dictionary mapping drug name to Drug object.
 
-    :param json_path: "drugs.json"
+    :param json_path: "drug.json"
     :return: dict[str(drug_name), Drug_object]
     """
     with open(json_path, "r", encoding="utf-8") as f:
@@ -214,10 +214,15 @@ def load_drug_database(json_path):
     for drug in list_of_drugs:
         drugs_dict[drug["name"]] = Drug(
             name=drug["name"],
+            drug_class=drug.get("drug_class", "Unknown"),
             pathway=drug["pathway"],
+            cyp_substrate=drug.get("cyp_substrate", []),
+            cyp_inhibits=drug.get("cyp_inhibits", []),
+            cyp_inhibits_strength=drug.get("cyp_inhibits_strength", {}),
             max_dose=drug["max_dose"],
             food_interactions=drug["food_interactions"],
             side_effects=drug["side_effects"],
             risk_factors=drug["risk_factors"]
         )
+    return drugs_dict
     return drugs_dict
