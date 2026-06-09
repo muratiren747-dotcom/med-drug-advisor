@@ -117,20 +117,20 @@ def measure_consistency(results_list):
 
 def run_single_benchmark(drug_entries, patient_data, our_result):
     gemini_runs, gemini_times = [], []
-    for _ in range(NUM_RUNS):
+    for i in range(NUM_RUNS):
         result, t = call_gemini(drug_entries, patient_data)
         gemini_runs.append(result)
         gemini_times.append(t)
 
     groq_runs, groq_times = [], []
-    for _ in range(NUM_RUNS):
+    for i in range(NUM_RUNS):
         result, t = call_groq(drug_entries, patient_data)
         groq_runs.append(result)
         groq_times.append(t)
 
     return {
         "our_result": our_result,
-        "our_time": 0.02,
+        "our_time": our_time,
         "gemini_result": gemini_runs[0],
         "gemini_time": round(sum(gemini_times) / NUM_RUNS, 3),
         "gemini_consistency": measure_consistency(gemini_runs),
