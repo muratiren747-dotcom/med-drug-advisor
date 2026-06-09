@@ -15,7 +15,7 @@ import ast
 backend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend'))
 sys.path.insert(0, backend_path)
 
-from core.analyzer import check_pathway_conflict, check_dose_safety, check_food_interactions, check_patient_risks
+from core.analyzer import analyze  # check_pathway_conflict yerine daha clean olacak şekilde updatelendi
 from core.database_mgr import load_drug_database
 from core.models import Patient
 
@@ -25,24 +25,11 @@ DRUGS_JSON = os.path.join(os.path.dirname(__file__), '..', 'backend', 'drugs.jso
 
 def run_our_system(drug_entries, patient_data):
     drug_db = load_drug_database(DRUGS_JSON)
-    patient = Patient(
-        username="benchmark",
-        age=patient_data.get("age", 40),
-        sex=patient_data.get("sex", "unknown"),
-        weight=patient_data.get("weight", 70),
-        medical_conditions=patient_data.get("conditions", []),
-        is_pregnant=patient_data.get("is_pregnant", False)
-    )
+    patient = Patient(...)
     drug_objects = [drug_db[name] for name in drug_entries if name in drug_db]
     daily_doses = {name: patient_data.get("daily_doses", {}).get(name, 100) for name in drug_entries}
-
-    warnings = []
-    warnings.extend(check_pathway_conflict(drug_objects))
-    for drug in drug_objects:
-        warnings.append(check_dose_safety(patient, drug, daily_doses[drug.name]))
-        warnings.extend(check_food_interactions(drug))
-        warnings.extend(check_patient_risks(patient, drug))
-    return warnings
+    result = analyze(patient, drug_objects, daily_doses)
+    return result
 
 
 def call_gemini(drug_entries, patient_data):

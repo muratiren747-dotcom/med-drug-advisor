@@ -8,6 +8,8 @@ using pandas and matplotlib. Saves PNG files to results/.
 import os
 import json
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 
