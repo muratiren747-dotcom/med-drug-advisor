@@ -225,4 +225,3 @@ def load_drug_database(json_path):
             risk_factors=drug["risk_factors"]
         )
     return drugs_dict
-    return drugs_dict
