@@ -1,21 +1,15 @@
-"""
----------
-models.py
----------
-
-Defines the two data classes used throughout the application:
-- Drug    : pharmacological knowledge loaded from drugs.json
-- Patient : user profile, constructed from the database after login
-"""
-
 class Drug:
     """
     The Drug class that stores the pharmacological features of a single drug object loaded
-    from database_mgr.py (drugs.json)
+    from database_mgr.py (drug.json)
     """
-    def __init__(self, name, pathway, max_dose, food_interactions, side_effects, risk_factors):
+    def __init__(self, name, drug_class, pathway, cyp_substrate, cyp_inhibits, cyp_inhibits_strength, max_dose, food_interactions, side_effects, risk_factors):
         self.name = name
+        self.drug_class = drug_class
         self.pathway = pathway
+        self.cyp_substrate = cyp_substrate
+        self.cyp_inhibits = cyp_inhibits
+        self.cyp_inhibits_strength = cyp_inhibits_strength
         self.max_dose = max_dose
         self.food_interactions = food_interactions
         self.side_effects = side_effects
@@ -23,16 +17,11 @@ class Drug:
 
     def get_info(self):
         return {"name": self.name,
+                "drug_class": self.drug_class,
                 "pathway": self.pathway,
                 "max_dose": self.max_dose,
                 "food_interactions": self.food_interactions,
                 "risk_factors": self.risk_factors}
-
-        """
-        :return: A dictionary of all drug attributes in human-readable form
-        for use in the analysis report.
-        """
-
 class Patient:
     """
     Patient class that stores the patient information (personal and medical profile of user) from the database_mgr.py
