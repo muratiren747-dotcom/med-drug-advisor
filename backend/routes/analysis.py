@@ -20,7 +20,10 @@ def analyze():
         return jsonify({"error": "user not found"}), 404
 
     # 2. Load the curated drug knowledge base
-    drug_db = database_mgr.load_drug_database("drugs.json")
+    import os
+    drugs_path = os.path.join(os.path.dirname(__file__), '..', 'drugs.json')
+    drug_db = database_mgr.load_drug_database(drugs_path)
+
 
     # 3. Convert submitted drug names → Drug objects; reject unknowns
     drug_objects = []
