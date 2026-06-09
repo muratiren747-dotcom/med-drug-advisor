@@ -3,7 +3,10 @@ from core import database_mgr, analyzer
 from routes import require_login
 
 analysis_bp = Blueprint("analysis", __name__)
-# Endpoints: POST /api/analyze
+
+# POST /api/analyze
+# Expects: { "drugs": [{"name": "Sertraline", "daily_dose": 100}, ...] }
+# Returns: { "result": {...}, "analysis_id": int }
 
 @analysis_bp.route("/analysis", methods=["POST"])
 @require_login
@@ -14,15 +17,15 @@ def analyze():
     if not drug_entries:
         return jsonify({"error": "no drugs provided"}), 400
 
-        # 1. Get the logged-in patient
+    # get the logged-in patient's profile from the database
     patient = database_mgr.get_patient(session["username"])
     if patient is None:
         return jsonify({"error": "user not found"}), 404
 
-    # 2. Load the curated drug knowledge base
+    # load the drug knowledge base
     drug_db = database_mgr.load_drug_database("drugs.json")
 
-    # 3. Convert submitted drug names → Drug objects; reject unknowns
+    # match submitted drug names to Drug objects, collect doses
     drug_objects = []
     daily_doses = {}
     invalid = []
@@ -32,20 +35,12 @@ def analyze():
             invalid.append(name)
             continue
         drug_objects.append(drug_db[name])
-        daily_doses[name] = entry.get("daily_dose")
+        daily_doses[name] = entry.get("daily_dose", 0)
 
     if invalid:
         return jsonify({"error": f"unknown drugs: {invalid}"}), 400
 
-    # 4. Run the four checkers
-    warnings = []
-    warnings.extend(analyzer.check_pathway_conflict(drug_objects))  # multi-drug
-    for drug in drug_objects:  # per-drug
-        warnings.append(analyzer.check_dose_safety(patient, drug, daily_doses[drug.name]))
-        warnings.extend(analyzer.check_food_interactions(drug))
-        warnings.extend(analyzer.check_patient_risks(patient, drug))
-
-    # 5. Save and return
-    result = {"warnings": warnings, "drugs": list(daily_doses.keys())}
+    # run all checkers and save to history
+    result = analyzer.analyze(patient, drug_objects, daily_doses)
     analysis_id = database_mgr.save_history(session["username"], result)
-    return jsonify({"warnings": warnings, "analysis_id": analysis_id})
+    return jsonify({"result": result, "analysis_id": analysis_id})
