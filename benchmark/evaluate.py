@@ -34,14 +34,14 @@ def run_our_system(drug_entries, patient_data):
 
 def call_gemini(drug_entries, patient_data):
     """Calls real Gemini API."""
-    import google.generativeai as genai
+    from google import genai
+    from google.genai import types
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         return ["ERROR: Gemini API key not found"], 0
 
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    client = genai.Client(api_key=api_key)
 
     prompt = f"""You are a clinical pharmacist. Analyze the following drug combination for a patient and list safety warnings.
 
@@ -55,7 +55,10 @@ Respond with ONLY the Python list, nothing else."""
 
     start = time.time()
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
         elapsed = time.time() - start
         text = response.text.strip()
         warnings = ast.literal_eval(text)
@@ -63,7 +66,7 @@ Respond with ONLY the Python list, nothing else."""
             warnings = [text]
     except Exception as e:
         elapsed = time.time() - start
-        warnings = ["Quota exceeded — try again later"]
+        warnings = [f"ERROR: {str(e)}"]
 
     return warnings, elapsed
 

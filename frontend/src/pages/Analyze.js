@@ -70,6 +70,7 @@ function DrugInput({ index, drug, onChange, onRemove }) {
               style={styles.doseInput}
               type="number"
               placeholder="100"
+              min="1"
               value={drug.daily_dose}
               onChange={(e) => onChange(index, 'daily_dose', e.target.value)}
             />

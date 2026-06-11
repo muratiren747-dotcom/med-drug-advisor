@@ -28,7 +28,11 @@
     },
     "max_dose": 200,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "St. John's Wort",
+      "caffeine",
+      "tyramine-rich foods"
     ],
     "side_effects": [
       "nausea",
@@ -77,7 +81,11 @@
     },
     "max_dose": 80,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "St. John's Wort",
+      "tyramine-rich foods",
+      "caffeine"
     ],
     "side_effects": [
       "nausea",
@@ -118,7 +126,10 @@
     },
     "max_dose": 20,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "St. John's Wort",
+      "caffeine"
     ],
     "side_effects": [
       "nausea",
@@ -161,7 +172,10 @@
     },
     "max_dose": 60,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "St. John's Wort",
+      "tyramine-rich foods"
     ],
     "side_effects": [
       "nausea",
@@ -200,7 +214,11 @@
     },
     "max_dose": 375,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "caffeine",
+      "tyramine-rich foods",
+      "St. John's Wort"
     ],
     "side_effects": [
       "nausea",
@@ -240,7 +258,11 @@
     },
     "max_dose": 120,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "caffeine",
+      "St. John's Wort",
+      "chargrilled meats"
     ],
     "side_effects": [
       "nausea",
@@ -276,7 +298,9 @@
     },
     "max_dose": 450,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "caffeine",
+      "St. John's Wort"
     ],
     "side_effects": [
       "insomnia",
@@ -312,7 +336,12 @@
     "cyp_inhibits_strength": {},
     "max_dose": 45,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "caffeine",
+      "St. John's Wort",
+      "chargrilled meats",
+      "cruciferous vegetables"
     ],
     "side_effects": [
       "sedation",
@@ -345,7 +374,10 @@
     "cyp_inhibits_strength": {},
     "max_dose": 400,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "St. John's Wort",
+      "high-fat meals"
     ],
     "side_effects": [
       "sedation",
@@ -376,7 +408,9 @@
     "max_dose": 800,
     "food_interactions": [
       "alcohol",
-      "grapefruit"
+      "grapefruit",
+      "caffeine",
+      "St. John's Wort"
     ],
     "side_effects": [
       "sedation",
@@ -411,7 +445,9 @@
     "cyp_inhibits_strength": {},
     "max_dose": 30,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "grapefruit",
+      "St. John's Wort"
     ],
     "side_effects": [
       "akathisia",
@@ -445,7 +481,11 @@
     "cyp_inhibits_strength": {},
     "max_dose": 20,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "caffeine",
+      "chargrilled meats",
+      "cruciferous vegetables",
+      "St. John's Wort"
     ],
     "side_effects": [
       "weight gain",
@@ -478,7 +518,8 @@
     "food_interactions": [
       "alcohol",
       "caffeine",
-      "low_sodium_diet"
+      "low sodium diet",
+      "NSAIDs"
     ],
     "side_effects": [
       "tremor",
@@ -516,7 +557,10 @@
     },
     "max_dose": 2000,
     "food_interactions": [
-      "alcohol"
+      "alcohol",
+      "carbonated drinks",
+      "high-fat meals",
+      "St. John's Wort"
     ],
     "side_effects": [
       "weight gain",
@@ -552,7 +596,9 @@
     "max_dose": 40,
     "food_interactions": [
       "alcohol",
-      "grapefruit"
+      "grapefruit",
+      "caffeine",
+      "St. John's Wort"
     ],
     "side_effects": [
       "sedation",
