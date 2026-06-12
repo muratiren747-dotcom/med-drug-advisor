@@ -10,29 +10,29 @@ function Benchmark() {
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-        <h2 style={styles.title}>Benchmark Sonuçları</h2>
+        <h2 style={styles.title}>Benchmark Results</h2>
 
         {!result ? (
           <>
             <p style={styles.intro}>
-              Psy-Med Advisor deterministik bir sistemdir — aynı girdi her zaman aynı sonucu verir.
-              Benchmark modülü bu sistemi Gemini ve Groq ile karşılaştırır.
+              Psy-Med Advisor is a deterministic system — the same input always yields the same result.
+              The benchmark module compares this system against Gemini and Groq.
             </p>
             <div style={styles.section}>
               <div style={styles.sectionLabel}>NASIL YAPILIR?</div>
               <div style={styles.steps}>
-                <div style={styles.step}><div style={styles.stepNum}>1</div><div>Analiz sayfasına git ve ilaçlarını gir</div></div>
-                <div style={styles.step}><div style={styles.stepNum}>2</div><div>Analiz Et butonuna bas</div></div>
-                <div style={styles.step}><div style={styles.stepNum}>3</div><div>Sonuç sayfasındaki "AI ile Karşılaştır" butonuna bas</div></div>
+                <div style={styles.step}><div style={styles.stepNum}>1</div><div>Go to the analysis page and enter your medications</div></div>
+                <div style={styles.step}><div style={styles.stepNum}>2</div><div>Click the Analyze button</div></div>
+                <div style={styles.step}><div style={styles.stepNum}>3</div><div>Click the "Compare with AI" button on the results page</div></div>
               </div>
             </div>
-            <button style={styles.button} onClick={() => navigate('/analyze')}>Analize Git →</button>
+            <button style={styles.button} onClick={() => navigate('/analyze')}>Go to Analysis →</button>
           </>
         ) : (
           <>
             {drugs && (
               <div style={styles.drugsBox}>
-                <span style={styles.smallLabel}>ANALİZ EDİLEN İLAÇLAR: </span>
+                <span style={styles.smallLabel}>ANALYZED DRUGS: </span>
                 <strong>{drugs.map(d => d.name).join(' + ')}</strong>
               </div>
             )}
@@ -41,27 +41,27 @@ function Benchmark() {
             <div style={styles.summaryGrid}>
               <div style={styles.summaryCard}>
                 <div style={styles.summaryTitle}>Psy-Med Advisor</div>
-                <div style={styles.summaryRow}><span>Hız</span><strong>{result.our_time}s</strong></div>
-                <div style={styles.summaryRow}><span>Uyarı</span><strong>{result.our_result?.length}</strong></div>
-                <div style={styles.summaryRow}><span>Tutarlılık</span><strong style={{color:'#2d6a4f'}}>%100</strong></div>
+                <div style={styles.summaryRow}><span>Speed</span><strong>{result.our_time}s</strong></div>
+                <div style={styles.summaryRow}><span>Warnings</span><strong>{result.our_result?.length}</strong></div>
+                <div style={styles.summaryRow}><span>Consistency</span><strong style={{color:'#2d6a4f'}}>%100</strong></div>
               </div>
               <div style={styles.summaryCard}>
                 <div style={styles.summaryTitle}>Gemini</div>
-                <div style={styles.summaryRow}><span>Hız</span><strong>{result.gemini_time}s</strong></div>
-                <div style={styles.summaryRow}><span>Uyarı</span><strong>{result.gemini_result?.length}</strong></div>
-                <div style={styles.summaryRow}><span>Tutarlılık</span><strong style={{color:'#f57f17'}}>%{result.gemini_consistency}</strong></div>
+                <div style={styles.summaryRow}><span>Speed</span><strong>{result.gemini_time}s</strong></div>
+                <div style={styles.summaryRow}><span>Warnings</span><strong>{result.gemini_result?.length}</strong></div>
+                <div style={styles.summaryRow}><span>Consistency</span><strong style={{color:'#f57f17'}}>%{result.gemini_consistency}</strong></div>
               </div>
               <div style={styles.summaryCard}>
                 <div style={styles.summaryTitle}>⚡ Groq</div>
-                <div style={styles.summaryRow}><span>Hız</span><strong>{result.groq_time}s</strong></div>
-                <div style={styles.summaryRow}><span>Uyarı</span><strong>{result.groq_result?.length}</strong></div>
-                <div style={styles.summaryRow}><span>Tutarlılık</span><strong style={{color:'#f57f17'}}>%{result.groq_consistency}</strong></div>
+                <div style={styles.summaryRow}><span>Speed</span><strong>{result.groq_time}s</strong></div>
+                <div style={styles.summaryRow}><span>Warnings</span><strong>{result.groq_result?.length}</strong></div>
+                <div style={styles.summaryRow}><span>Consistency</span><strong style={{color:'#f57f17'}}>%{result.groq_consistency}</strong></div>
               </div>
             </div>
 
             {/* GRAFİKLER */}
             <div style={styles.section}>
-              <div style={styles.sectionLabel}>GRAFİKLER</div>
+              <div style={styles.sectionLabel}>CHARTS</div>
               <div style={styles.chartsGrid}>
                 <div style={styles.chartBox}>
                   <img src={`http://localhost:5000/benchmark/charts/speed_chart.png?t=${Date.now()}`}
@@ -83,7 +83,7 @@ function Benchmark() {
 
             {/* UYARI DETAYLARI */}
             <div style={styles.section}>
-              <div style={styles.sectionLabel}>UYARI DETAYLARI</div>
+              <div style={styles.sectionLabel}>WARNING DETAILS</div>
               <div style={styles.cardsGrid}>
                 <div style={styles.card}>
                   <div style={styles.cardTitle}>Psy-Med Advisor</div>
@@ -114,7 +114,7 @@ function Benchmark() {
               </div>
             </div>
 
-            <button style={styles.button} onClick={() => navigate('/analyze')}>Yeni Analiz →</button>
+            <button style={styles.button} onClick={() => navigate('/analyze')}>New Analysis →</button>
           </>
         )}
       </div>

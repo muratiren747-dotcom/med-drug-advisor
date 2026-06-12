@@ -17,7 +17,7 @@ function Results() {
   const interactions = warnings.filter(w => typeof w === 'object' && w.drugs);
   const doseWarnings = warnings.filter(w => typeof w === 'string' && (w.includes('within range') || w.includes('exceeds')));
   const foodWarnings = warnings.filter(w => typeof w === 'string' && w.includes('Avoid'));
-  const riskWarnings = warnings.filter(w => typeof w === 'string' && !w.includes('within range') && !w.includes('exceeds') && !w.includes('Avoid'));
+  const riskWarnings = warnings.filter(w => typeof w === 'string' && !w.includes('within range') && !w.includes('exceeds') && !w.includes('Avoid') && !w.includes('CYP') && !w.includes('pathway'));
 
   const getSeverityStyle = (text) => {
     if (!text) return styles.infoCard;
@@ -40,7 +40,7 @@ function Results() {
       setBenchmarkDone(true);
       navigate('/benchmark', { state: { benchmarkResult: response.data, drugs } });
     } catch (err) {
-      setBenchmarkResult({ error: 'Benchmark şu an kullanılamıyor.' });
+      setBenchmarkResult({ error: 'Benchmark is currently unavailable.' });
     }
     setLoading(false);
   };
@@ -49,14 +49,14 @@ function Results() {
     <div style={styles.page}>
       <div style={styles.container}>
 
-        <h2 style={styles.title}>Analiz Sonuçları</h2>
+        <h2 style={styles.title}>Analysis Results</h2>
 
         <div style={styles.patientInput}>
-          <div style={styles.sectionLabel}>HASTA GİRDİSİ</div>
+          <div style={styles.sectionLabel}>PATIENT INPUT</div>
           <div style={styles.cardRow}>
             {drugs.map((d, i) => (
               <div key={i} style={styles.inputCard}>
-                <div style={styles.inputCardLabel}>İlaç {i + 1}</div>
+                <div style={styles.inputCardLabel}>Drug {i + 1}</div>
                 <div style={styles.inputCardValue}>{d.name} · {d.daily_dose} mg</div>
               </div>
             ))}
@@ -65,14 +65,14 @@ function Results() {
 
         {interactions.length > 0 && (
           <div style={styles.dangerSection}>
-            <div style={styles.dangerHeader}>⚠️ İlaç-İlaç Etkileşimi</div>
+            <div style={styles.dangerHeader}>⚠️ Drug-Drug Interaction</div>
             {interactions.map((w, i) => (
               <div key={i}>
                 <p style={styles.dangerText}>
-                  <strong>{w.drugs[0]}</strong> ve <strong>{w.drugs[1]}</strong> aynı metabolik yolu paylaşıyor: <strong>{Array.isArray(w.shared_pathway) ? w.shared_pathway.join(', ') : w.shared_pathway}</strong>
+                  <strong>{w.drugs[0]}</strong> ve <strong>{w.drugs[1]}</strong> shares the metabolic pathway: <strong>{Array.isArray(w.shared_pathway) ? w.shared_pathway.join(', ') : w.shared_pathway}</strong>
                 </p>
                 <p style={styles.dangerSubText}>
-                  Bu durum ilaçların kan düzeylerini etkileyebilir ve beklenmedik yan etkilere yol açabilir.
+                  This may affect drug blood levels and lead to unexpected side effects.
                 </p>
               </div>
             ))}
@@ -81,7 +81,7 @@ function Results() {
 
         {doseWarnings.length > 0 && (
           <div style={styles.section}>
-            <div style={styles.sectionLabel}>DOZ DEĞERLENDİRMESİ</div>
+            <div style={styles.sectionLabel}>DOSE ASSESSMENT</div>
             {doseWarnings.map((w, i) => (
               <div key={i} style={getSeverityStyle(w)}>
                 {w.replace('INFO: ', '').replace('DANGER: ', '').replace('CAUTION: ', '')}
@@ -92,7 +92,7 @@ function Results() {
 
         {foodWarnings.length > 0 && (
           <div style={styles.section}>
-            <div style={styles.sectionLabel}>GIDA UYARILARI</div>
+            <div style={styles.sectionLabel}>FOOD WARNINGS</div>
             {foodWarnings.map((w, i) => (
               <div key={i} style={styles.cautionCard}>
                 {w.replace('CAUTION: ', '')}
@@ -103,7 +103,7 @@ function Results() {
 
         {riskWarnings.length > 0 && (
           <div style={styles.section}>
-            <div style={styles.sectionLabel}>HASTA RİSKLERİ</div>
+            <div style={styles.sectionLabel}>PATIENT RISKS</div>
             {riskWarnings.map((w, i) => (
               <div key={i} style={getSeverityStyle(w)}>
                 {w}
@@ -114,12 +114,12 @@ function Results() {
 
         {interactions.length === 0 && doseWarnings.length === 0 && foodWarnings.length === 0 && riskWarnings.length === 0 && (
           <div style={styles.safeCard}>
-            ✅ Herhangi bir risk tespit edilmedi.
+            ✅ No risks detected.
           </div>
         )}
         {symptoms.length > 0 && (
   <div style={styles.section}>
-    <div style={styles.sectionLabel}>BELİRTİ ANALİZİ</div>
+    <div style={styles.sectionLabel}>SYMPTOM ANALYSIS</div>
     {symptoms.map((symptom, i) => {
       const drugNames = drugs.map(d => d.name.toLowerCase());
 const sideEffectsMap = {
@@ -162,8 +162,8 @@ const isCommon = allSideEffects.includes(englishSymptom);
       return (
         <div key={i} style={isCommon ? styles.cautionCard : styles.dangerCard}>
           {isCommon
-            ? `✓ "${symptom}" — bu ilaçlarda görülebilen yaygın bir yan etkidir. Devam ederse doktorunuza danışın.`
-            : `⚠️ "${symptom}" — bu ilaçlarla doğrudan ilişkili değil. Devam ederse doktorunuza başvurun.`
+            ? `✓ "${symptom}" — is a commonly reported side effect of these medications. Consult your doctor if it persists.`
+            : `⚠️ "${symptom}" — is not directly associated with these medications. Consult your doctor if it persists.`
           }
         </div>
       );
@@ -171,16 +171,16 @@ const isCommon = allSideEffects.includes(englishSymptom);
   </div>
 )}
         <div style={styles.disclaimer}>
-          Bu sistem yalnızca eğitim amaçlı bilgi sunar. Tıbbi tavsiye, teşhis veya reçete yerine geçmez. Acil bir durumda 112'yi arayınız.
+          This system provides educational information only. It does not replace medical advice, diagnosis, or prescribing. In case of emergency, call 112.
         </div>
 
         <button style={styles.benchmarkButton} onClick={handleBenchmark} disabled={loading}>
-          {loading ? '⏳ AI ile karşılaştırılıyor...' : '🤖 AI ile Karşılaştır'}
+          {loading ? '⏳ Comparing with AI...' : '🤖 Compare with AI'}
         </button>
 
         {benchmarkResult && !benchmarkResult.error && (
   <div style={styles.benchmarkSection}>
-    <div style={styles.sectionLabel}>BENCHMARK SONUÇLARI</div>
+    <div style={styles.sectionLabel}>BENCHMARK RESULTS</div>
     <div style={styles.benchmarkGrid}>
       <div style={styles.benchmarkCard}>
         <div style={styles.benchmarkName}>Psy-Med Advisor</div>
@@ -249,7 +249,7 @@ const isCommon = allSideEffects.includes(englishSymptom);
         )}
 
         <button style={styles.button} onClick={() => navigate('/analyze')}>
-          Yeni Analiz
+          New Analysis
         </button>
       </div>
     </div>
