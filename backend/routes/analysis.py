@@ -53,12 +53,14 @@ def analyze():
         drug_objects.append(drug_db[name])
 
         try:
-            daily_doses[name] = float(entry.get("daily_dose", 0))
+            dose = float(entry.get("daily_dose", 0))
         except (ValueError, TypeError):
-            daily_doses[name] = 0.0
+            dose = 0.0
 
-    if invalid:
-        return jsonify({"error": f"unknown drugs: {invalid}"}), 400
+        if dose < 0:
+            return jsonify({"error": f"dose for {name} cannot be negative"}), 400
+
+        daily_doses[name] = dose
 
     # The core analysis engine is triggered independently.
     raw_report = analyzer.analyze(patient, drug_objects, daily_doses)

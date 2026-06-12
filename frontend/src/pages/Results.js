@@ -14,11 +14,32 @@ function Results() {
   const { result, drugs, symptoms = [] } = state;
   const warnings = result.warnings || [];
 
-  const interactions = warnings.filter(w => typeof w === 'object' && w.drugs);
-  const doseWarnings = warnings.filter(w => typeof w === 'string' && (w.includes('within range') || w.includes('exceeds')));
-  const foodWarnings = warnings.filter(w => typeof w === 'string' && w.includes('Avoid'));
-  const riskWarnings = warnings.filter(w => typeof w === 'string' && !w.includes('within range') && !w.includes('exceeds') && !w.includes('Avoid'));
+  // severity rank for sorting: DANGER first, then CAUTION, then INFO
+  const severityRank = (w) => {
+    const t = typeof w === 'string' ? w : (w.severity || '');
+    if (t.startsWith('DANGER') || t.includes('DO NOT USE')) return 0;
+    if (t.startsWith('CAUTION')) return 1;
+    return 2;
+  };
+  const bySeverity = (a, b) => severityRank(a) - severityRank(b);
 
+  const interactions = warnings
+    .filter(w => typeof w === 'object' && w.drugs)
+    .sort(bySeverity);
+
+  const doseWarnings = warnings
+    .filter(w => typeof w === 'string' && (w.includes('range') || w.includes('exceeds') || w.includes('dose')))
+    .sort(bySeverity);
+
+  const foodWarnings = warnings
+    .filter(w => typeof w === 'string' && w.includes('Avoid'));
+
+  const riskWarnings = warnings
+    .filter(w => typeof w === 'string'
+      && !w.includes('range') && !w.includes('exceeds') && !w.includes('dose')
+      && !w.includes('Avoid'))
+    .sort(bySeverity);
+  
   const getSeverityStyle = (text) => {
     if (!text) return styles.infoCard;
     const t = typeof text === 'string' ? text : JSON.stringify(text);

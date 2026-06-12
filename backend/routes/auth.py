@@ -32,6 +32,13 @@ def register():
     if not username or not password:
         return jsonify({"error": "username and password required"}), 400
 
+    age = patient_info.get("age")
+    weight = patient_info.get("weight")
+    if age is not None and age < 0:
+        return jsonify({"error": "age cannot be negative"}), 400
+    if weight is not None and weight < 0:
+        return jsonify({"error": "weight cannot be negative"}), 400
+
     ok = database_mgr.create_user_account(username, password, patient_info)
     if not ok:
         return jsonify({"error": "user already exists"}), 409
