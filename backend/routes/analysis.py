@@ -33,7 +33,9 @@ def analyze():
     if patient is None:
         return jsonify({"error": "user not found"}), 404
 
-    drug_db = database_mgr.load_drug_database("drugs.json")
+    import os
+    drugs_path = os.path.join(os.path.dirname(__file__), '..', 'drugs.json')
+    drug_db = database_mgr.load_drug_database(drugs_path)
 
     drug_objects = []
     daily_doses = {}

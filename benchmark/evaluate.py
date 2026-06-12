@@ -25,7 +25,14 @@ DRUGS_JSON = os.path.join(os.path.dirname(__file__), '..', 'backend', 'drugs.jso
 
 def run_our_system(drug_entries, patient_data):
     drug_db = load_drug_database(DRUGS_JSON)
-    patient = Patient(...)
+    patient = Patient(
+        username="benchmark",
+        age=patient_data.get("age", 40),
+        sex=patient_data.get("sex", "unknown"),
+        weight=patient_data.get("weight", 70),
+        medical_conditions=patient_data.get("conditions", []),
+        is_pregnant=patient_data.get("is_pregnant", False)
+    )
     drug_objects = [drug_db[name] for name in drug_entries if name in drug_db]
     daily_doses = {name: patient_data.get("daily_doses", {}).get(name, 100) for name in drug_entries}
     result = analyze(patient, drug_objects, daily_doses)
@@ -117,8 +124,7 @@ def measure_consistency(results_list):
     most_common = max(set(frozen), key=frozen.count)
     return round(frozen.count(most_common) / len(frozen) * 100, 1)
 
-
-def run_single_benchmark(drug_entries, patient_data, our_result):
+def run_single_benchmark(drug_entries, patient_data, our_result, our_time=0.02):
     gemini_runs, gemini_times = [], []
     for i in range(NUM_RUNS):
         result, t = call_gemini(drug_entries, patient_data)
