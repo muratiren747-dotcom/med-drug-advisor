@@ -35,10 +35,10 @@ function Profile() {
         medical_conditions: conditions ? conditions.split(',').map(c => c.trim()) : []
       }, { withCredentials: true });
       setSaved(true);
-      setMessage(`Profilin güncellendi!`);
+      setMessage(`Profile updated!`);
       setTimeout(() => setSaved(false), 3000);
     } catch (err) {
-      setMessage('Güncelleme başarısız.');
+      setMessage('Update failed.');
     }
   };
 
@@ -49,8 +49,8 @@ function Profile() {
         <div style={styles.header}>
           <div style={styles.avatar}>{initials}</div>
           <div>
-            <h2 style={styles.name}>Merhaba, {username} !</h2>
-            <p style={styles.subtitle}>Profilini güncel tutmak daha doğru analiz sonuçları almanı sağlar.</p>
+            <h2 style={styles.name}>Hello, {username} !</h2>
+            <p style={styles.subtitle}>Keeping your profile updated ensures more accurate analysis results.</p>
           </div>
         </div>
 
@@ -61,56 +61,56 @@ function Profile() {
         )}
 
         <div style={styles.card}>
-          <div style={styles.sectionLabel}>KİŞİSEL BİLGİLER</div>
+          <div style={styles.sectionLabel}>PERSONAL INFORMATION</div>
 
           <div style={styles.row}>
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Yaş</label>
+              <label style={styles.label}>Age</label>
               <input style={styles.input} type="number" placeholder="örn: 32"
                 value={age} onChange={(e) => setAge(e.target.value)} />
             </div>
             <div style={styles.inputGroup}>
-              <label style={styles.label}>Kilo (kg)</label>
+              <label style={styles.label}>Weight (kg)</label>
               <input style={styles.input} type="number" placeholder="örn: 68"
                 value={weight} onChange={(e) => setWeight(e.target.value)} />
             </div>
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Cinsiyet</label>
+            <label style={styles.label}>Gender</label>
             <select style={styles.input} value={sex} onChange={(e) => setSex(e.target.value)}>
-              <option value="female">Kadın</option>
-              <option value="male">Erkek</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
             </select>
           </div>
         </div>
 
         <div style={styles.card}>
-          <div style={styles.sectionLabel}>SAĞLIK BİLGİLERİ</div>
+          <div style={styles.sectionLabel}>HEALTH INFORMATION</div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Mevcut hastalıklarınız</label>
+            <label style={styles.label}>Current medical conditions</label>
             <input style={styles.input} type="text"
               placeholder="örn: diabetes, hypertension, bipolar disorder"
               value={conditions} onChange={(e) => setConditions(e.target.value)} />
-            <p style={styles.hint}>Birden fazla hastalık varsa virgülle ayırın</p>
+            <p style={styles.hint}>Separate multiple conditions with a comma</p>
           </div>
 
           <div style={styles.pregnancyBox}>
             <div>
-              <div style={styles.pregnancyLabel}>Hamilelik durumu</div>
-              <div style={styles.pregnancyHint}>Hamile iseniz veya hamile kalma olasılığınız varsa belirtiniz</div>
+              <div style={styles.pregnancyLabel}>Pregnancy Status</div>
+              <div style={styles.pregnancyHint}>Please indicate if you are pregnant or may become pregnant</div>
             </div>
             <div style={styles.toggle}>
               <button
                 style={isPregnant ? styles.toggleActive : styles.toggleInactive}
                 onClick={() => setIsPregnant(true)}>
-                Evet
+                Yes
               </button>
               <button
                 style={!isPregnant ? styles.toggleActive : styles.toggleInactive}
                 onClick={() => setIsPregnant(false)}>
-                Hayır
+                No
               </button>
             </div>
           </div>
@@ -118,11 +118,11 @@ function Profile() {
 
         <div style={styles.infoBox}>
           <span style={styles.infoIcon}>🔒</span>
-          <span style={styles.infoText}>Bilgileriniz yalnızca ilaç analizi için kullanılır ve güvenle saklanır.</span>
+          <span style={styles.infoText}>Your information is only used for drug analysis and is stored securely.</span>
         </div>
 
         <button style={styles.button} onClick={handleUpdate}>
-          Profili Kaydet
+          Save Profile
         </button>
 
       </div>

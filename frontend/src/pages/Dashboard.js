@@ -27,30 +27,28 @@ function Dashboard() {
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-        <h2 style={styles.title}>Merhaba, {username} !</h2>
-        <p style={styles.subtitle}>Bugün nasılsın?</p>
+        <h2 style={styles.title}>Hello, {username} !</h2>
+        <p style={styles.subtitle}>How are you today?</p>
 
         <div style={styles.cardGrid}>
           <div style={styles.card}>
             <div style={styles.cardIcon}>💉</div>
-            <div style={styles.cardLabel}>Son Analiz</div>
             <div style={styles.cardValue}>{lastAnalysis}</div>
           </div>
           <div style={styles.card}>
             <div style={styles.cardIcon}>📋</div>
-            <div style={styles.cardLabel}>Toplam Analiz</div>
             <div style={styles.cardValue}>{totalAnalysis}</div>
           </div>
           <div style={styles.card}>
             <div style={styles.cardIcon}>⚠️</div>
-            <div style={styles.cardLabel}>Son Uyarı</div>
+            <div style={styles.cardLabel}>Last Warning</div>
             <div style={styles.cardValue} style={{fontSize: '0.9rem'}}>{lastWarningText}</div>
           </div>
         </div>
 
         {history.length > 0 && (
           <div style={styles.recentSection}>
-            <div style={styles.sectionLabel}>SON ANALİZLER</div>
+            <div style={styles.sectionLabel}>RECENT ANALYSES</div>
             {history.slice(0, 3).map((item, i) => (
               <div key={i} style={styles.recentCard} onClick={() => navigate('/history')}>
                 <div style={styles.recentDrugs}>
@@ -68,7 +66,7 @@ function Dashboard() {
             ))}
             {history.length > 3 && (
               <button style={styles.viewAll} onClick={() => navigate('/history')}>
-                Tümünü gör →
+                View all →
               </button>
             )}
           </div>
@@ -77,7 +75,7 @@ function Dashboard() {
         {history.length === 0 && (
           <div style={styles.infoBox}>
             <p style={styles.infoText}>
-              💡 İlaçlarınızı girerek etkileşim analizi yapabilirsiniz.
+              💡 Enter your medications to start an interaction analysis.
             </p>
           </div>
         )}

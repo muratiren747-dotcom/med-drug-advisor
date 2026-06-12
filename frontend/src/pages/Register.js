@@ -32,11 +32,11 @@ function Register() {
   const handleNext = () => {
     setError('');
     if (step === 1 && (!username || !password)) {
-      setError('Kullanıcı adı ve şifre gerekli.'); return;
+      setError('Username and password are required.'); return;
     }
-    if (step === 2 && !age) { setError('Lütfen yaşınızı girin.'); return; }
-    if (step === 3 && !sex) { setError('Lütfen cinsiyetinizi seçin.'); return; }
-    if (step === 4 && !weight) { setError('Lütfen kilonuzu girin.'); return; }
+    if (step === 2 && !age) { setError('Please enter your age.'); return; }
+    if (step === 3 && !sex) { setError('Please select your gender'); return; }
+    if (step === 4 && !weight) { setError('Please enter your weight.'); return; }
     if (step === 5) {
       if (sex === 'female') { setStep(6); return; }
       else { handleRegister(); return; }
@@ -60,7 +60,7 @@ function Register() {
       }, { withCredentials: true });
       navigate('/login');
     } catch (err) {
-      setError('Kayıt başarısız. Bu kullanıcı adı zaten alınmış olabilir.');
+      setError('Registration failed. This username may already be taken.');
       setStep(1);
     }
   };
@@ -69,8 +69,8 @@ function Register() {
     switch (step) {
       case 1: return (
         <>
-          <h2 style={styles.title}>Hesap Oluştur</h2>
-          <p style={styles.subtitle}>Bilgileriniz güvenle saklanır.</p>
+          <h2 style={styles.title}>Create Account</h2>
+          <p style={styles.subtitle}>Your information is stored securely.</p>
           <div style={styles.inputGroup}>
             <label style={styles.label}>Kullanıcı Adı</label>
             <input style={styles.input} type="text" placeholder="kullanici_adi"
@@ -85,8 +85,8 @@ function Register() {
       );
       case 2: return (
         <>
-          <h2 style={styles.title}>Kaç yaşındasınız?</h2>
-          <p style={styles.subtitle}>Doz değerlendirmesi için kullanılır.</p>
+          <h2 style={styles.title}>How old are you?</h2>
+          <p style={styles.subtitle}>Used for dose assessment.</p>
           <div style={styles.inputGroup}>
             <label style={styles.label}>Yaş</label>
             <input style={styles.input} type="number" placeholder="örn: 32"
@@ -96,20 +96,20 @@ function Register() {
       );
       case 3: return (
         <>
-          <h2 style={styles.title}>Cinsiyetiniz?</h2>
-          <p style={styles.subtitle}>Bazı ilaçlar cinsiyete göre farklı etki gösterebilir.</p>
+          <h2 style={styles.title}>What is your gender?</h2>
+          <p style={styles.subtitle}>Some medications affect genders differently.</p>
           <div style={styles.toggleRow}>
             <button style={sex === 'female' ? styles.toggleActive : styles.toggleInactive}
-              onClick={() => setSex('female')}>Kadın</button>
+              onClick={() => setSex('female')}>Female</button>
             <button style={sex === 'male' ? styles.toggleActive : styles.toggleInactive}
-              onClick={() => setSex('male')}>Erkek</button>
+              onClick={() => setSex('male')}>Male</button>
           </div>
         </>
       );
       case 4: return (
         <>
-          <h2 style={styles.title}>Kilonuz?</h2>
-          <p style={styles.subtitle}>Ağırlığa göre doz aralıkları değişebilir.</p>
+          <h2 style={styles.title}>What is your weight?</h2>
+          <p style={styles.subtitle}>Dose ranges may vary by weight.</p>
           <div style={styles.inputGroup}>
             <label style={styles.label}>Kilo (kg)</label>
             <input style={styles.input} type="number" placeholder="örn: 68"
@@ -119,26 +119,26 @@ function Register() {
       );
       case 5: return (
         <>
-          <h2 style={styles.title}>Mevcut hastalıklarınız?</h2>
-          <p style={styles.subtitle}>Yoksa boş bırakabilirsiniz.</p>
+          <h2 style={styles.title}>Any current medical conditions?</h2>
+          <p style={styles.subtitle}>Leave blank if none.</p>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Hastalıklar</label>
+            <label style={styles.label}>Conditions</label>
             <input style={styles.input} type="text"
               placeholder="örn: diabetes, hypertension"
               value={conditions} onChange={e => setConditions(e.target.value)} />
-            <p style={styles.hint}>Birden fazlaysa virgülle ayırın</p>
+            <p style={styles.hint}>Separate multiple conditions with a comma</p>
           </div>
         </>
       );
       case 6: return (
         <>
-          <h2 style={styles.title}>Hamile misiniz veya hamile kalma olasılığınız var mı?</h2>
-          <p style={styles.subtitle}>Bazı ilaçlar hamilelikte risk taşıyabilir.</p>
+          <h2 style={styles.title}>Are you pregnant or may become pregnant?</h2>
+          <p style={styles.subtitle}>Some medications carry risks during pregnancy.</p>
           <div style={styles.toggleRow}>
             <button style={isPregnant === true ? styles.toggleActive : styles.toggleInactive}
-              onClick={() => setIsPregnant(true)}>Evet</button>
+              onClick={() => setIsPregnant(true)}>Yes</button>
             <button style={isPregnant === false ? styles.toggleActive : styles.toggleInactive}
-              onClick={() => setIsPregnant(false)}>Hayır</button>
+              onClick={() => setIsPregnant(false)}>No</button>
           </div>
         </>
       );
@@ -164,18 +164,18 @@ function Register() {
           {error && <p style={styles.error}>{error}</p>}
 
           <button style={styles.button} onClick={handleNext}>
-            {step === TOTAL_STEPS || (step === 5 && sex === 'male') ? 'Kayıt Ol' : 'Devam Et →'}
+            {step === TOTAL_STEPS || (step === 5 && sex === 'male') ? 'Sign Up' : 'Continue →'}
           </button>
 
           {step > 1 && (
             <button style={styles.backBtn} onClick={() => setStep(step - 1)}>
-              ← Geri
+              ← Back
             </button>
           )}
 
           {step === 1 && (
             <p style={styles.linkText}>
-              Zaten hesabın var mı? <Link to="/login" style={styles.linkStyle}>Giriş Yap</Link>
+              Already have an account? <Link to="/login" style={styles.linkStyle}>Sign In</Link>
             </p>
           )}
         </div>

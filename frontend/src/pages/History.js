@@ -30,14 +30,14 @@ function History() {
 
         {!selected ? (
           <>
-            <h2 style={styles.title}>Geçmişim</h2>
-            <p style={styles.subtitle}>Daha önce yaptığın analizler</p>
+            <h2 style={styles.title}>History</h2>
+            <p style={styles.subtitle}>Your previous analyses</p>
 
             {loading && <p style={styles.loading}>Yükleniyor...</p>}
 
             {!loading && history.length === 0 && (
               <div style={styles.emptyBox}>
-                <p style={{margin: 0}}>Henüz analiz yapmadınız.</p>
+                <p style={{margin: 0}}>No analyses yet.</p>
               </div>
             )}
 
@@ -57,17 +57,17 @@ function History() {
                 <div style={styles.drugs}>
                    {item.analysis_result?.drugs?.join(' + ') || '—'}
                 </div>
-                <div style={styles.detailHint}>Detay için tıkla →</div>
+                <div style={styles.detailHint}>Click for details →</div>
               </div>
             ))}
           </>
         ) : (
           <>
             <button style={styles.backBtn} onClick={() => setSelected(null)}>
-              ← Geçmişe dön
+              ← Back to history
             </button>
 
-            <h2 style={styles.title}>Analiz Detayı</h2>
+            <h2 style={styles.title}>Analysis Detail</h2>
             <p style={styles.subtitle}>
               {new Date(selected.created_at).toLocaleDateString('tr-TR', {
                 day: 'numeric', month: 'long', year: 'numeric',
@@ -76,11 +76,11 @@ function History() {
             </p>
 
             <div style={styles.patientInput}>
-              <div style={styles.sectionLabel}>ANALİZ EDİLEN İLAÇLAR</div>
+              <div style={styles.sectionLabel}>ANALYZED DRUGS</div>
               <div style={styles.cardRow}>
                 {selected.analysis_result?.drugs?.map((drug, i) => (
                   <div key={i} style={styles.inputCard}>
-                    <div style={styles.inputCardLabel}>İlaç {i + 1}</div>
+                    <div style={styles.inputCardLabel}>Drug {i + 1}</div>
                     <div style={styles.inputCardValue}> {drug}</div>
                   </div>
                 ))}
@@ -89,14 +89,14 @@ function History() {
 
             {interactions.length > 0 && (
               <div style={styles.dangerSection}>
-                <div style={styles.dangerHeader}>⚠️ İlaç-İlaç Etkileşimi</div>
+                <div style={styles.dangerHeader}>⚠️ Drug-Drug Interaction</div>
                 {interactions.map((w, i) => (
                   <div key={i}>
                     <p style={styles.dangerText}>
-                      <strong>{w.drugs[0]}</strong> ve <strong>{w.drugs[1]}</strong> aynı metabolik yolu paylaşıyor: <strong>{Array.isArray(w.shared_pathway) ? w.shared_pathway.join(', ') : w.shared_pathway}</strong>
+                      <strong>{w.drugs[0]}</strong> ve <strong>{w.drugs[1]}</strong> shares the metabolic pathway: <strong>{Array.isArray(w.shared_pathway) ? w.shared_pathway.join(', ') : w.shared_pathway}</strong>
                     </p>
                     <p style={styles.dangerSubText}>
-                      CYP2D6, karaciğerde ilaçları parçalayan bir enzimdir. İki ilaç aynı enzimi kullandığında biri diğerinin metabolizmasını yavaşlatabilir — bu da kanda ilaç birikmesine ve yan etki riskinin artmasına yol açar.
+                      CYP2D6 is an enzyme in the liver that metabolizes drugs. When two drugs share the same enzyme, one may slow the metabolism of the other — leading to increased drug levels in the blood and higher risk of side effects.
                     </p>
                   </div>
                 ))}
@@ -105,7 +105,7 @@ function History() {
 
             {doseWarnings.length > 0 && (
               <div style={styles.section}>
-                <div style={styles.sectionLabel}>DOZ DEĞERLENDİRMESİ</div>
+                <div style={styles.sectionLabel}>DOSE ASSESSMENT</div>
                 {doseWarnings.map((w, i) => (
                   <div key={i} style={getSeverityStyle(w)}>
                     {w.replace('INFO: ', '').replace('DANGER: ', '').replace('CAUTION: ', '')}
@@ -116,7 +116,7 @@ function History() {
 
             {foodWarnings.length > 0 && (
               <div style={styles.section}>
-                <div style={styles.sectionLabel}>GIDA UYARILARI</div>
+                <div style={styles.sectionLabel}>FOOD WARNINGS</div>
                 {foodWarnings.map((w, i) => (
                   <div key={i} style={styles.cautionCard}>
                     {w.replace('CAUTION: ', '')}
@@ -127,7 +127,7 @@ function History() {
 
             {riskWarnings.length > 0 && (
               <div style={styles.section}>
-                <div style={styles.sectionLabel}>HASTA RİSKLERİ</div>
+                <div style={styles.sectionLabel}>PATIENT RISKS</div>
                 {riskWarnings.map((w, i) => (
                   <div key={i} style={getSeverityStyle(w)}>
                     {w}
@@ -137,11 +137,11 @@ function History() {
             )}
 
             {warnings.length === 0 && (
-              <div style={styles.safeCard}>✅ Bu analizde herhangi bir risk tespit edilmemişti.</div>
+              <div style={styles.safeCard}>✅ No risks were detected in this analysis.</div>
             )}
 
             <div style={styles.disclaimer}>
-              Bu sistem yalnızca eğitim amaçlı bilgi sunar. Tıbbi tavsiye, teşhis veya reçete yerine geçmez. Acil bir durumda 112'yi arayınız.
+              This system provides educational information only. It does not replace medical advice, diagnosis, or prescribing. In case of emergency, call 112.
             </div>
           </>
         )}

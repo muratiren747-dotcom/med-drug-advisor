@@ -25,7 +25,14 @@ DRUGS_JSON = os.path.join(os.path.dirname(__file__), '..', 'backend', 'drugs.jso
 
 def run_our_system(drug_entries, patient_data):
     drug_db = load_drug_database(DRUGS_JSON)
-    patient = Patient(...)
+    patient = Patient(
+        username="benchmark",
+        age=patient_data.get("age", 40),
+        sex=patient_data.get("sex", "unknown"),
+        weight=patient_data.get("weight", 70),
+        medical_conditions=patient_data.get("conditions", []),
+        is_pregnant=patient_data.get("is_pregnant", False)
+    )
     drug_objects = [drug_db[name] for name in drug_entries if name in drug_db]
     daily_doses = {name: patient_data.get("daily_doses", {}).get(name, 100) for name in drug_entries}
     result = analyze(patient, drug_objects, daily_doses)
@@ -34,14 +41,14 @@ def run_our_system(drug_entries, patient_data):
 
 def call_gemini(drug_entries, patient_data):
     """Calls real Gemini API."""
-    import google.generativeai as genai
+    from google import genai
+    from google.genai import types
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         return ["ERROR: Gemini API key not found"], 0
 
-    genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    client = genai.Client(api_key=api_key)
 
     prompt = f"""You are a clinical pharmacist. Analyze the following drug combination for a patient and list safety warnings.
 
@@ -55,7 +62,10 @@ Respond with ONLY the Python list, nothing else."""
 
     start = time.time()
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt
+        )
         elapsed = time.time() - start
         text = response.text.strip()
         warnings = ast.literal_eval(text)
@@ -63,7 +73,7 @@ Respond with ONLY the Python list, nothing else."""
             warnings = [text]
     except Exception as e:
         elapsed = time.time() - start
-        warnings = ["Quota exceeded — try again later"]
+        warnings = [f"ERROR: {str(e)}"]
 
     return warnings, elapsed
 
@@ -114,8 +124,7 @@ def measure_consistency(results_list):
     most_common = max(set(frozen), key=frozen.count)
     return round(frozen.count(most_common) / len(frozen) * 100, 1)
 
-
-def run_single_benchmark(drug_entries, patient_data, our_result):
+def run_single_benchmark(drug_entries, patient_data, our_result, our_time=0.02):
     gemini_runs, gemini_times = [], []
     for i in range(NUM_RUNS):
         result, t = call_gemini(drug_entries, patient_data)
