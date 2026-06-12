@@ -42,7 +42,7 @@ function Login() {
       localStorage.setItem('username', response.data.username);
       navigate('/analyze');
     } catch (err) {
-      setError('Kullanıcı adı veya şifre yanlış.');
+      setError('Invalid username or password.');
     }
   };
 
@@ -50,22 +50,22 @@ function Login() {
     <div style={styles.page}>
       <div style={styles.left}>
         <div style={styles.formBox}>
-          <h2 style={styles.welcome}>Hoş Geldin</h2>
-          <p style={styles.subtitle}>Hesabına giriş yap</p>
+          <h2 style={styles.welcome}>Welcome Back !</h2>
+          <p style={styles.subtitle}>Sign in to your account.</p>
           {error && <p style={styles.error}>{error}</p>}
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Kullanıcı Adı</label>
-            <input style={styles.input} type="text" placeholder="kullanici_adi"
+            <label style={styles.label}>Username</label>
+            <input style={styles.input} type="text" placeholder="username"
               value={username} onChange={(e) => setUsername(e.target.value)} />
           </div>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Şifre</label>
+            <label style={styles.label}>Password</label>
             <input style={styles.input} type="password" placeholder="••••••••"
               value={password} onChange={(e) => setPassword(e.target.value)} />
           </div>
-          <button style={styles.button} onClick={handleLogin}>Giriş Yap</button>
+          <button style={styles.button} onClick={handleLogin}>Sign In</button>
           <p style={styles.linkText}>
-            Hesabın yok mu? <Link to="/register" style={styles.linkStyle}>Kayıt Ol</Link>
+            Don't have an account? <Link to="/register" style={styles.link}>Sign Up</Link>
           </p>
         </div>
       </div>

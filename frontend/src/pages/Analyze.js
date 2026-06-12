@@ -36,12 +36,12 @@ function DrugInput({ index, drug, onChange, onRemove }) {
     <div style={styles.drugRow}>
       <div style={styles.drugInputWrapper}>
         <div style={styles.inputGroup}>
-          <label style={styles.label}>İlaç {index + 1}</label>
+          <label style={styles.label}>Drug {index + 1}</label>
           <div style={{ position: 'relative' }}>
             <input
               style={styles.input}
               type="text"
-              placeholder="İlaç adı (örn: Sertraline)"
+              placeholder="Drug name (örn: Sertraline)"
               value={drug.name}
               onChange={(e) => handleNameChange(e.target.value)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
@@ -64,7 +64,7 @@ function DrugInput({ index, drug, onChange, onRemove }) {
         </div>
 
         <div style={styles.inputGroup}>
-          <label style={styles.label}>Günlük Doz</label>
+          <label style={styles.label}>Daily Dose</label>
           <div style={styles.doseWrapper}>
             <input
               style={styles.doseInput}
@@ -116,7 +116,7 @@ const toggleSymptom = (symptom) => {
   const handleAnalyze = async () => {
     const validDrugs = drugs.filter(d => d.name && d.daily_dose);
     if (validDrugs.length === 0) {
-      setError('Lütfen en az bir ilaç adı ve dozu girin.');
+      setError('Please enter at least one drug name and dose.');
       return;
     }
     try {
@@ -131,23 +131,24 @@ const toggleSymptom = (symptom) => {
 
       navigate('/results', { state: { result: response.data, drugs: validDrugs, symptoms } });
     } catch (err) {
-      setError('Analiz başarısız. Lütfen ilaç adlarını kontrol edin.');
+      setError('Analysis failed. Please check the drug names.');
     }
   };
 
   return (
     <div style={styles.page}>
       <div style={styles.container}>
-        <h2 style={styles.title}>İlaç Analizi</h2>
+        <h2 style={styles.title}>Drug Analysis</h2>
         <p style={styles.subtitle}>
           Kullandığınız ilaçları ve günlük dozlarını girin.
-          Sistemimiz FDA onaylı verilerle etkileşimleri analiz eder.
+          Enter your medications and daily doses.
+          Our system analyzes interactions using FDA-approved data.
         </p>
 
         {error && <div style={styles.errorBox}>{error}</div>}
 
         <div style={styles.card}>
-          <div style={styles.sectionLabel}>İLAÇLARINIZ</div>
+          <div style={styles.sectionLabel}>YOUR MEDICATIONS</div>
           {drugs.map((drug, index) => (
             <DrugInput
               key={index}
@@ -160,18 +161,18 @@ const toggleSymptom = (symptom) => {
 
           {drugs.length < 5 && (
             <button style={styles.addBtn} onClick={addDrug}>
-              + İlaç Ekle
+              + Add Drug
             </button>
           )}
         </div>
 
         <div style={styles.card}>
-          <div style={styles.sectionLabel}>YAŞAM TARZI</div>
+          <div style={styles.sectionLabel}>LIFESTYLE</div>
           <div style={styles.smokingBox}>
             <div>
-              <div style={styles.smokingLabel}>Sigara kullanıyor musunuz?</div>
+              <div style={styles.smokingLabel}>Do you smoke?</div>
               <div style={styles.smokingHint}>
-                Sigara bazı ilaçların metabolizmasını hızlandırarak etkinliğini azaltabilir.
+                Smoking can speed up the metabolism of some medications, reducing their effectiveness.
               </div>
             </div>
             <div style={styles.toggle}>
@@ -189,16 +190,16 @@ const toggleSymptom = (symptom) => {
           </div>
         </div>
         <div style={styles.card}>
-  <div style={styles.sectionLabel}>ŞU AN YAŞADIĞINIZ BELİRTİLER</div>
+  <div style={styles.sectionLabel}>CURRENT SYMPTOMS</div>
   <p style={styles.smokingHint}>
-    Varsa belirtin — ilaçlarınızla ilişkili olup olmadığını analiz edelim.
+    If any — let us analyze whether they may be related to your medications.
   </p>
   <div style={styles.tagContainer}>
     {[
-      'Bulantı', 'Baş dönmesi', 'Uykusuzluk',
-      'Kalp çarpıntısı', 'Nefes darlığı', 'Titreme',
-      'Terleme', 'Yorgunluk', 'Ağız kuruluğu',
-      'İştah kaybı', 'Baş ağrısı', 'Sinirlilik'
+      'Nausea', 'Dizziness', 'Insomnia',
+      'Palpitations', 'Shortness of breath', 'Tremor',
+      'Sweating', 'Fatigue', 'Dry mouth',
+      'Loss of appetite', 'Headache', 'Irritability'
     ].map((symptom) => (
       <button
         key={symptom}
@@ -211,11 +212,11 @@ const toggleSymptom = (symptom) => {
   </div>
 </div>
         <button style={styles.analyzeBtn} onClick={handleAnalyze}>
-          Analiz Et →
+          Analyze →
         </button>
 
         <p style={styles.disclaimer}>
-          Bu sistem yalnızca eğitim amaçlıdır. Tıbbi tavsiye yerine geçmez.
+          This system is for educational purposes only. Not a substitute for medical advice.
         </p>
       </div>
     </div>
@@ -276,3 +277,4 @@ tagActive: {
 };
 
 export default Analyze;
+

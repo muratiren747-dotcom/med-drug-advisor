@@ -3,9 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const menuItems = [
   { path: '/dashboard', icon: '📊', label: 'Dashboard' },
-  { path: '/analyze', icon: '💉', label: 'İlaç Analizi' },
-  { path: '/history', icon: '📋', label: 'Geçmişim' },
-  { path: '/profile', icon: '👤', label: 'Profilim' },
+  { path: '/analyze', icon: '💉', label: 'Drug Analysis' },
+  { path: '/history', icon: '📋', label: 'History' },
+  { path: '/profile', icon: '👤', label: 'Profile' },
   { path: '/benchmark', icon: '⚡', label: 'Benchmark' },
 ];
 
@@ -31,7 +31,7 @@ function Sidebar() {
         <div style={styles.avatar}>{initials}</div>
         <div>
           <div style={styles.userName}>{username}</div>
-          <div style={styles.userRole}>Hasta</div>
+          <div style={styles.userRole}>Patient</div>
         </div>
       </div>
 
