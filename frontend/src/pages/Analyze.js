@@ -107,6 +107,7 @@ function Analyze() {
   const [smoking, setSmoking] = useState(false);
   const [symptoms, setSymptoms] = useState([]);
   const [error, setError] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false); // Yeni yükleme state'i
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -139,10 +140,25 @@ function Analyze() {
 
   const handleAnalyze = async () => {
     const validDrugs = drugs.filter(d => d.name && d.daily_dose);
+
     if (validDrugs.length === 0) {
       setError('Please enter at least one drug name and dose.');
       return;
     }
+
+    // --- DUPLICATE KONTROLÜ ---
+    const drugNames = validDrugs.map(d => d.name.toLowerCase().trim());
+    const uniqueNames = new Set(drugNames);
+
+    if (uniqueNames.size !== drugNames.length) {
+      setError('You have entered the same medication multiple times. Please remove duplicates.');
+      return;
+    }
+    // -------------------------
+
+    setIsAnalyzing(true);
+    setError('');
+
     try {
       const response = await axios.post('https://med-drug-backend.onrender.com/api/analysis', {
         drugs: validDrugs.map(d => ({
@@ -155,7 +171,13 @@ function Analyze() {
 
       navigate('/results', { state: { result: response.data, drugs: validDrugs, symptoms } });
     } catch (err) {
-      setError(err.response?.data?.error || 'Analysis failed. Please check the drug names.');
+      if (!err.response) {
+        setError('Cannot connect to the server. It might be waking up, please wait a moment and try again.');
+      } else {
+        setError(err.response?.data?.error || 'Analysis failed. Please check the drug names.');
+      }
+    } finally {
+      setIsAnalyzing(false);
     }
   };
 
@@ -238,8 +260,12 @@ function Analyze() {
           </div>
         </div>
 
-        <button style={styles.analyzeBtn} onClick={handleAnalyze}>
-          Analyze →
+        <button
+          style={{...styles.analyzeBtn, opacity: isAnalyzing ? 0.7 : 1, cursor: isAnalyzing ? 'wait' : 'pointer'}}
+          onClick={handleAnalyze}
+          disabled={isAnalyzing}
+        >
+          {isAnalyzing ? 'Analyzing... (Waking up server)' : 'Analyze →'}
         </button>
 
         <p style={styles.disclaimer}>
@@ -275,7 +301,7 @@ const styles = {
   toggle: { display: 'flex', gap: '0.5rem', flexShrink: 0 },
   toggleActive: { padding: '0.4rem 1rem', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '20px', cursor: 'pointer', fontWeight: '600', fontSize: '0.85rem' },
   toggleInactive: { padding: '0.4rem 1rem', backgroundColor: 'white', color: '#6b7280', border: '1px solid #d1d5db', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem' },
-  analyzeBtn: { padding: '1rem', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: '700', cursor: 'pointer' },
+  analyzeBtn: { padding: '1rem', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: '700', transition: 'all 0.2s ease' },
   errorBox: { backgroundColor: '#fff5f5', color: '#742a2a', padding: '0.8rem 1rem', borderRadius: '8px', border: '1px solid #feb2b2', fontSize: '0.9rem' },
   disclaimer: { fontSize: '0.8rem', color: '#9ca3af', textAlign: 'center' },
   tagContainer: { display: 'flex', flexWrap: 'wrap', gap: '0.5rem' },
