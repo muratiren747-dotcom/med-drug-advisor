@@ -14,15 +14,13 @@ Role & Responsibilities:
 import os
 from flask import Flask, jsonify, send_from_directory
 from flask_cors import CORS
-
 from core import database_mgr
+from extensions import limiter
 from routes.auth import auth_bp
 from routes.profile import profile_bp
 from routes.history import history_bp
 from routes.analysis import analysis_bp
 from routes.benchmark import benchmark_bp
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
 
 def create_app():
     """
@@ -34,12 +32,7 @@ def create_app():
     """
     app = Flask(__name__)
 
-    limiter = Limiter(
-        get_remote_access,
-        app=app,
-        default_limits=["200 per day", "30 per hour"],
-        storage_uri="memory://",
-    )
+    limiter.init_app(app)
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "364ddea40c41d998d9c23c4d18b6f42351a8ab9107e3007a")
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"

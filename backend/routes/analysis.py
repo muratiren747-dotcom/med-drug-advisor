@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from core import database_mgr, analyzer
 from routes import require_login
-from app import limiter
+from extensions import limiter
 
 analysis_bp = Blueprint("analysis", __name__)
 """
