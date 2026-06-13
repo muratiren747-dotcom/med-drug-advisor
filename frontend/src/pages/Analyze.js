@@ -2,15 +2,25 @@ import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-
-function DrugInput({ index, drug, drugList, onChange, onRemove }) {
+function DrugInput({ index, drug, drugList, onChange, onRemove, selectedDrugs }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const getOtherSelectedNames = () => {
+    return selectedDrugs
+      .filter((_, i) => i !== index)
+      .map(d => d.name.toLowerCase());
+  };
+
   const handleNameChange = (value) => {
     onChange(index, 'name', value);
-    // Boşken: tüm liste. Harf varken: o harfle başlayanlar.
-    const filtered = drugList.filter(d => d.toLowerCase().startsWith(value.toLowerCase()));
+    const otherSelectedNames = getOtherSelectedNames();
+
+    const filtered = drugList.filter(d =>
+        d.toLowerCase().startsWith(value.toLowerCase()) &&
+        !otherSelectedNames.includes(d.toLowerCase())
+    );
+
     setSuggestions(filtered);
     setShowSuggestions(true);
   };
@@ -33,8 +43,9 @@ function DrugInput({ index, drug, drugList, onChange, onRemove }) {
               placeholder="Drug name (e.g., Sertraline)"
               value={drug.name}
               onFocus={() => {
-                // Boş tıklayınca tüm listeyi göster
-                setSuggestions(drugList);
+                const otherSelectedNames = getOtherSelectedNames();
+                const filtered = drugList.filter(d => !otherSelectedNames.includes(d.toLowerCase()));
+                setSuggestions(filtered);
                 setShowSuggestions(true);
               }}
               onChange={(e) => handleNameChange(e.target.value)}
@@ -67,14 +78,11 @@ function DrugInput({ index, drug, drugList, onChange, onRemove }) {
               min="0.1"
               step="0.1"
               onKeyDown={(e) => {
-                // Eksi işareti ve e (eksponansiyel) harfini engelle
                 if (e.key === '-' || e.key === 'e') e.preventDefault();
               }}
               value={drug.daily_dose}
               onChange={(e) => onChange(index, 'daily_dose', e.target.value)}
               onBlur={(e) => {
-                // Kullanıcı kutudan (inputtan) başka bir yere tıkladığında:
-                // Eğer değer boşsa veya 0 (ve altı) girildiyse, otomatik olarak 0.1'e yuvarla
                 const val = parseFloat(e.target.value);
                 if (!e.target.value || val <= 0) {
                   onChange(index, 'daily_dose', '0.1');
@@ -120,13 +128,15 @@ function Analyze() {
   const removeDrug = (index) => {
     setDrugs(drugs.filter((_, i) => i !== index));
   };
-const toggleSymptom = (symptom) => {
+
+  const toggleSymptom = (symptom) => {
     setSymptoms(prev =>
       prev.includes(symptom)
         ? prev.filter(s => s !== symptom)
         : [...prev, symptom]
     );
   };
+
   const handleAnalyze = async () => {
     const validDrugs = drugs.filter(d => d.name && d.daily_dose);
     if (validDrugs.length === 0) {
@@ -135,13 +145,13 @@ const toggleSymptom = (symptom) => {
     }
     try {
       const response = await axios.post('https://med-drug-backend.onrender.com/api/analysis', {
-    drugs: validDrugs.map(d => ({
-      name: d.name,
-      daily_dose: parseFloat(d.daily_dose)
-    })),
-    lifestyle: { smoking },
-    symptoms: symptoms
-}, { withCredentials: true });
+        drugs: validDrugs.map(d => ({
+          name: d.name,
+          daily_dose: parseFloat(d.daily_dose)
+        })),
+        lifestyle: { smoking },
+        symptoms: symptoms
+      }, { withCredentials: true });
 
       navigate('/results', { state: { result: response.data, drugs: validDrugs, symptoms } });
     } catch (err) {
@@ -170,6 +180,7 @@ const toggleSymptom = (symptom) => {
               drugList={drugList}
               onChange={updateDrug}
               onRemove={removeDrug}
+              selectedDrugs={drugs}
             />
           ))}
 
@@ -203,28 +214,30 @@ const toggleSymptom = (symptom) => {
             </div>
           </div>
         </div>
+
         <div style={styles.card}>
-  <div style={styles.sectionLabel}>CURRENT SYMPTOMS</div>
-  <p style={styles.smokingHint}>
-    If any — let us analyze whether they may be related to your medications.
-  </p>
-  <div style={styles.tagContainer}>
-    {[
-      'Nausea', 'Dizziness', 'Insomnia',
-      'Palpitations', 'Shortness of breath', 'Tremor',
-      'Sweating', 'Fatigue', 'Dry mouth',
-      'Loss of appetite', 'Headache', 'Irritability'
-    ].map((symptom) => (
-      <button
-        key={symptom}
-        style={symptoms.includes(symptom) ? styles.tagActive : styles.tag}
-        onClick={() => toggleSymptom(symptom)}
-      >
-        {symptom}
-      </button>
-    ))}
-  </div>
-</div>
+          <div style={styles.sectionLabel}>CURRENT SYMPTOMS</div>
+          <p style={styles.smokingHint}>
+            If any — let us analyze whether they may be related to your medications.
+          </p>
+          <div style={styles.tagContainer}>
+            {[
+              'Nausea', 'Dizziness', 'Insomnia',
+              'Palpitations', 'Shortness of breath', 'Tremor',
+              'Sweating', 'Fatigue', 'Dry mouth',
+              'Loss of appetite', 'Headache', 'Irritability'
+            ].map((symptom) => (
+              <button
+                key={symptom}
+                style={symptoms.includes(symptom) ? styles.tagActive : styles.tag}
+                onClick={() => toggleSymptom(symptom)}
+              >
+                {symptom}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <button style={styles.analyzeBtn} onClick={handleAnalyze}>
           Analyze →
         </button>
@@ -265,29 +278,9 @@ const styles = {
   analyzeBtn: { padding: '1rem', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: '700', cursor: 'pointer' },
   errorBox: { backgroundColor: '#fff5f5', color: '#742a2a', padding: '0.8rem 1rem', borderRadius: '8px', border: '1px solid #feb2b2', fontSize: '0.9rem' },
   disclaimer: { fontSize: '0.8rem', color: '#9ca3af', textAlign: 'center' },
-  tagContainer: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '0.5rem',
-},
-tag: {
-    padding: '0.4rem 0.9rem',
-    borderRadius: '20px',
-    border: '1px solid #d1d5db',
-    backgroundColor: 'white',
-    color: '#4b5563',
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-},
-tagActive: {
-    padding: '0.4rem 0.9rem',
-    borderRadius: '20px',
-    border: '1px solid #2d6a4f',
-    backgroundColor: '#2d6a4f',
-    color: 'white',
-    fontSize: '0.85rem',
-    cursor: 'pointer',
-},
+  tagContainer: { display: 'flex', flexWrap: 'wrap', gap: '0.5rem' },
+  tag: { padding: '0.4rem 0.9rem', borderRadius: '20px', border: '1px solid #d1d5db', backgroundColor: 'white', color: '#4b5563', fontSize: '0.85rem', cursor: 'pointer' },
+  tagActive: { padding: '0.4rem 0.9rem', borderRadius: '20px', border: '1px solid #2d6a4f', backgroundColor: '#2d6a4f', color: 'white', fontSize: '0.85rem', cursor: 'pointer' },
 };
 
 export default Analyze;

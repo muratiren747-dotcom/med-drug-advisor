@@ -1,21 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
+import React, { useState, useRef, useEffect } from 'react';
+
+const HARDCODED_CONDITIONS = [
+    "cardiac_disease",
+    "hypertension",
+    "diabetes",
+    "renal_disease",
+    "liver_disease",
+    "respiratory_disease",
+    "bipolar_disorder",
+    "seizure_disorder",
+    "eating_disorder",
+    "elderly_dementia",
+    "substance_use_disorder"
+];
 
 const ConditionSelector = ({ selectedConditions, onChange }) => {
-    // Dinamik olarak backend'den dolacak liste
-    const [availableConditions, setAvailableConditions] = useState([]);
     const [inputValue, setInputValue] = useState("");
-    const [isOpen, setIsOpen] = useState(false); // Menü açıklık durumu
-    const wrapperRef = useRef(null); // Dışarı tıklamayı yakalamak için referans
+    const [isOpen, setIsOpen] = useState(false);
+    const wrapperRef = useRef(null);
 
-    // Bileşen ekrana geldiğinde API'den hastalıkları çek
-    useEffect(() => {
-        axios.get('https://med-drug-backend.onrender.com/api/conditions', { withCredentials: true })
-            .then(res => setAvailableConditions(res.data))
-            .catch(err => console.error("Hastalıklar yüklenemedi:", err));
-    }, []);
-
-    // Dışarı tıklanıp tıklanmadığını dinleyen effect
     useEffect(() => {
         function handleClickOutside(event) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -23,9 +26,7 @@ const ConditionSelector = ({ selectedConditions, onChange }) => {
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
+        return () => document.removeEventListener("mousedown", handleClickOutside);
     }, [wrapperRef]);
 
     const handleAdd = (condition) => {
@@ -40,14 +41,15 @@ const ConditionSelector = ({ selectedConditions, onChange }) => {
         onChange(selectedConditions.filter(c => c !== conditionToRemove));
     };
 
-    // Filtreleme: Dinamik listeyi kullanıyoruz (Case insensitive)
-    const filteredConditions = availableConditions.filter(c =>
+    const filteredConditions = HARDCODED_CONDITIONS.filter(c =>
         c.toLowerCase().startsWith(inputValue.toLowerCase()) &&
         !selectedConditions.includes(c)
     );
 
-    // Arayüzde alt çizgiyi boşluğa çeviren yardımcı fonksiyon
-    const formatName = (name) => name.replace(/_/g, ' ');
+    const formatName = (name) => {
+        // Alt çizgileri boşluk yap ve baş harflerini büyük yaz (Örn: "cardiac_disease" -> "Cardiac Disease")
+        return name.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    };
 
     return (
         <div className="condition-selector" ref={wrapperRef}>
