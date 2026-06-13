@@ -11,6 +11,7 @@ Role & Responsibilities:
 """
 from flask import Blueprint, request, jsonify, session
 from core import database_mgr
+from app import limiter
 
 auth_bp = Blueprint("auth", __name__)
 # Endpoints: POST /api/register, POST /api/login, POST /api/logout
@@ -45,6 +46,7 @@ def register():
     return jsonify({"username": username}), 201
 
 @auth_bp.route("/login", methods=["POST"])
+@limiter.limit("5 per minute")
 def login():
     """
     =========================================================================

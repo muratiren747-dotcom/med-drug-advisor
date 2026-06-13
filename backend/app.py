@@ -21,6 +21,8 @@ from routes.profile import profile_bp
 from routes.history import history_bp
 from routes.analysis import analysis_bp
 from routes.benchmark import benchmark_bp
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 def create_app():
     """
@@ -31,8 +33,16 @@ def create_app():
     =========================================================================
     """
     app = Flask(__name__)
+
+    limiter = Limiter(
+        get_remote_access,
+        app=app,
+        default_limits=["200 per day", "30 per hour"],
+        storage_uri="memory://",
+    )
+
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "364ddea40c41d998d9c23c4d18b6f42351a8ab9107e3007a")
-    app.config["SESSION_COOKIE_SAMESITE"] = "None"
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
     app.config["SESSION_COOKIE_SECURE"] = True
 
     # Securely configures CORS to allow authenticated requests from the frontend origin

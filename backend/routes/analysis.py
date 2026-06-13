@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, session
 from core import database_mgr, analyzer
 from routes import require_login
+from app import limiter
 
 analysis_bp = Blueprint("analysis", __name__)
 """
@@ -16,6 +17,7 @@ Layer : API Routing & Data Adapter Layer
 
 @analysis_bp.route("/analysis", methods=["POST"])
 @require_login
+@limiter.limit("10 per hour")
 def analyze():
     body = request.get_json() or {}
     drug_entries = body.get("drugs", [])
