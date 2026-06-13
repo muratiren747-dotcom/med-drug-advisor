@@ -193,12 +193,12 @@ const toggleSymptom = (symptom) => {
               <button
                 style={smoking ? styles.toggleActive : styles.toggleInactive}
                 onClick={() => setSmoking(true)}>
-                Evet
+                Yes
               </button>
               <button
                 style={!smoking ? styles.toggleActive : styles.toggleInactive}
                 onClick={() => setSmoking(false)}>
-                Hayır
+                No
               </button>
             </div>
           </div>
