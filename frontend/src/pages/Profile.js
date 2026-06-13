@@ -1,3 +1,4 @@
+import ConditionSelector from "../components/ConditionSelector";
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
@@ -9,9 +10,10 @@ function Profile() {
   const [sex, setSex] = useState('female');
   const [weight, setWeight] = useState('');
   const [isPregnant, setIsPregnant] = useState(false);
-  const [conditions, setConditions] = useState('');
+  const [conditions, setConditions] = useState([]);
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(false);
+
   useEffect(() => {
     axios.get('http://localhost:5000/api/profile', { withCredentials: true })
       .then(res => {
@@ -20,7 +22,7 @@ function Profile() {
         if (data.sex) setSex(data.sex);
         if (data.weight) setWeight(data.weight);
         if (data.is_pregnant) setIsPregnant(data.is_pregnant);
-        if (data.medical_conditions) setConditions(data.medical_conditions.join(', '));
+        if (data.medical_conditions) setConditions(data.medical_conditions);
       })
       .catch(() => {});
   }, []);
@@ -32,13 +34,34 @@ function Profile() {
         sex,
         weight: parseFloat(weight),
         is_pregnant: isPregnant,
-        medical_conditions: conditions ? conditions.split(',').map(c => c.trim()) : []
+        medical_conditions: conditions
       }, { withCredentials: true });
       setSaved(true);
       setMessage(`Profile updated!`);
-      setTimeout(() => setSaved(false), 3000);
+      setTimeout(() => {
+        setSaved(false);
+        setMessage('');
+      }, 4000);
+
     } catch (err) {
       setMessage('Update failed.');
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const isConfirmed = window.confirm(
+      "Are you sure you want to permanently delete your account? This action cannot be undone and all your analysis history will be lost."
+    );
+
+    if (isConfirmed) {
+      try {
+        await axios.delete('http://localhost:5000/api/account', { withCredentials: true });
+        localStorage.removeItem('username'); // Oturumu temizle
+        window.location.href = '/login'; // Login sayfasına yönlendir
+      } catch (err) {
+        console.error("Hesap silinirken hata oluştu:", err);
+        alert("An error occurred while deleting the account.");
+      }
     }
   };
 
@@ -66,19 +89,26 @@ function Profile() {
           <div style={styles.row}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Age</label>
-              <input style={styles.input} type="number" placeholder="örn: 32"
+              <input style={styles.input} type="number" placeholder="e.g., 32"
+                min="0"
+                onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                 value={age} onChange={(e) => setAge(e.target.value)} />
             </div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Weight (kg)</label>
-              <input style={styles.input} type="number" placeholder="örn: 68"
+              <input style={styles.input} type="number" placeholder="e.g., 68"
+                min="0"
+                onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                 value={weight} onChange={(e) => setWeight(e.target.value)} />
             </div>
           </div>
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Gender</label>
-            <select style={styles.input} value={sex} onChange={(e) => setSex(e.target.value)}>
+            <select style={styles.input} value={sex} onChange={(e) => {
+              setSex(e.target.value);
+              if (e.target.value === "male") setIsPregnant(false);
+            }}>
               <option value="female">Female</option>
               <option value="male">Male</option>
             </select>
@@ -90,30 +120,29 @@ function Profile() {
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Current medical conditions</label>
-            <input style={styles.input} type="text"
-              placeholder="örn: diabetes, hypertension, bipolar disorder"
-              value={conditions} onChange={(e) => setConditions(e.target.value)} />
-            <p style={styles.hint}>Separate multiple conditions with a comma</p>
+            <ConditionSelector selectedConditions={conditions} onChange={setConditions} />
+            <p style={styles.hint}>Search and select conditions from the list</p>
           </div>
-
-          <div style={styles.pregnancyBox}>
-            <div>
-              <div style={styles.pregnancyLabel}>Pregnancy Status</div>
-              <div style={styles.pregnancyHint}>Please indicate if you are pregnant or may become pregnant</div>
+          {sex === 'female' && (
+            <div style={styles.pregnancyBox}>
+              <div>
+                <div style={styles.pregnancyLabel}>Pregnancy Status</div>
+                <div style={styles.pregnancyHint}>Please indicate if you are pregnant or may become pregnant</div>
+              </div>
+              <div style={styles.toggle}>
+                <button
+                  style={isPregnant ? styles.toggleActive : styles.toggleInactive}
+                  onClick={() => setIsPregnant(true)}>
+                  Yes
+                </button>
+                <button
+                  style={!isPregnant ? styles.toggleActive : styles.toggleInactive}
+                  onClick={() => setIsPregnant(false)}>
+                  No
+                </button>
+              </div>
             </div>
-            <div style={styles.toggle}>
-              <button
-                style={isPregnant ? styles.toggleActive : styles.toggleInactive}
-                onClick={() => setIsPregnant(true)}>
-                Yes
-              </button>
-              <button
-                style={!isPregnant ? styles.toggleActive : styles.toggleInactive}
-                onClick={() => setIsPregnant(false)}>
-                No
-              </button>
-            </div>
-          </div>
+          )}
         </div>
 
         <div style={styles.infoBox}>
@@ -124,6 +153,19 @@ function Profile() {
         <button style={styles.button} onClick={handleUpdate}>
           Save Profile
         </button>
+
+        {/* YENİ EKLENEN HESAP SİLME BÖLÜMÜ */}
+        <div style={styles.deleteSection}>
+          <button
+            type="button"
+            onClick={handleDeleteAccount}
+            style={styles.deleteBtn}
+            onMouseOver={(e) => { e.target.style.backgroundColor = '#fef2f2'; }}
+            onMouseOut={(e) => { e.target.style.backgroundColor = 'transparent'; }}
+          >
+            Delete Account
+          </button>
+        </div>
 
       </div>
     </div>
@@ -156,6 +198,8 @@ const styles = {
   button: { padding: '0.9rem', backgroundColor: '#2d6a4f', color: 'white', border: 'none', borderRadius: '8px', fontSize: '1rem', fontWeight: '600', cursor: 'pointer' },
   successMsg: { backgroundColor: '#f0fff4', color: '#22543d', padding: '0.8rem 1rem', borderRadius: '8px', border: '1px solid #9ae6b4', textAlign: 'center' },
   errorMsg: { backgroundColor: '#fff5f5', color: '#742a2a', padding: '0.8rem 1rem', borderRadius: '8px', border: '1px solid #feb2b2', textAlign: 'center' },
+  deleteSection: { marginTop: '2rem', borderTop: '1px solid #e5e7eb', paddingTop: '1.5rem', textAlign: 'center' },
+  deleteBtn: { backgroundColor: 'transparent', color: '#dc2626', border: '1px solid #dc2626', padding: '0.6rem 1.2rem', borderRadius: '6px', fontSize: '0.9rem', fontWeight: '600', cursor: 'pointer', transition: 'all 0.2s' }
 };
 
 export default Profile;

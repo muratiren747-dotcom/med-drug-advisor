@@ -178,9 +178,14 @@ def check_cumulative_pathway_conflict(drug_list, doses):
                 f"risking {impact}."
             )
 
+            perp_names = [p.split(" ")[0] for p in perpetrators]
+            involved_drugs = list(set(victims + perp_names))
+
             warnings.append({
                 "severity": severity,
-                "explanation": explanation
+                "explanation": explanation,
+                "involved_drugs": involved_drugs,
+                "pathway": enzyme
             })
 
     return warnings
@@ -190,7 +195,7 @@ def check_cumulative_pathway_conflict(drug_list, doses):
 
 def check_substrate_saturation(drug_list):
     """
-    Checks for competitive enzyme overload. Triggered when multiple drugs compete 
+    Checks for competitive enzyme overload. Triggered when multiple drugs compete
     as substrates for the same pathway, even if no direct inhibitor is present.
     """
     warnings = []
@@ -214,7 +219,9 @@ def check_substrate_saturation(drug_list):
             )
             warnings.append({
                 "severity": "INFO",
-                "explanation": explanation
+                "explanation": explanation,
+                "involved_drugs": drugs,
+                "pathway": enzyme
             })
 
     return warnings
@@ -477,13 +484,13 @@ def collect_warnings(report):
     all_warnings = []
     for _, key in REPORT_SECTIONS:
         all_warnings.extend(report.get(key, []))
-        
+
     for interaction in report.get("interactions", []):
         all_warnings.append(f"{interaction['severity']}: {interaction['explanation']}")
-        
+
     for saturation in report.get("substrate_saturation", []):
         all_warnings.append(f"{saturation['severity']}: {saturation['explanation']}")
-        
+
     return all_warnings
 
 

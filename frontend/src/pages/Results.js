@@ -24,11 +24,15 @@ function Results() {
   const bySeverity = (a, b) => severityRank(a) - severityRank(b);
 
   const interactions = warnings
-    .filter(w => typeof w === 'object' && w.drugs)
+    .filter(w => typeof w === 'object' && (w.type === 'interaction' || (w.drugs && w.type !== 'saturation')))
+    .sort(bySeverity);
+
+  const saturations = warnings
+    .filter(w => typeof w === 'object' && w.type === 'saturation')
     .sort(bySeverity);
 
   const doseWarnings = warnings
-    .filter(w => typeof w === 'string' && (w.includes('range') || w.includes('exceeds') || w.includes('dose')))
+    .filter(w => typeof w === 'string' && (w.includes('range') || w.includes('exceeds') || w.includes('dose') || w.includes('too high')))
     .sort(bySeverity);
 
   const foodWarnings = warnings
@@ -36,7 +40,7 @@ function Results() {
 
   const riskWarnings = warnings
     .filter(w => typeof w === 'string'
-      && !w.includes('range') && !w.includes('exceeds') && !w.includes('dose')
+      && !w.includes('range') && !w.includes('exceeds') && !w.includes('dose') && !w.includes('too high')
       && !w.includes('Avoid')
       && !w.includes('CYP') && !w.includes('pathway'))
     .sort(bySeverity);
@@ -91,7 +95,7 @@ function Results() {
             {interactions.map((w, i) => (
               <div key={i}>
                 <p style={styles.dangerText}>
-                  <strong>{w.drugs[0]}</strong> ve <strong>{w.drugs[1]}</strong> shares the metabolic pathway: <strong>{Array.isArray(w.shared_pathway) ? w.shared_pathway.join(', ') : w.shared_pathway}</strong>
+                  <strong>{w.drugs[0]}</strong> and <strong>{w.drugs[1]}</strong> shares the metabolic pathway: <strong>{Array.isArray(w.shared_pathway) ? w.shared_pathway.join(', ') : w.shared_pathway}</strong>
                 </p>
                 <p style={styles.dangerSubText}>
                   This may affect drug blood levels and lead to unexpected side effects.
@@ -123,6 +127,17 @@ function Results() {
           </div>
         )}
 
+        {saturations.length > 0 && (
+          <div style={styles.section}>
+            <div style={styles.sectionLabel}>ENZYMATIC & METABOLIC DYNAMICS</div>
+            {saturations.map((w, i) => (
+              <div key={i} style={getSeverityStyle(w.severity)}>
+                {w.message}
+              </div>
+            ))}
+          </div>
+        )}
+
         {riskWarnings.length > 0 && (
           <div style={styles.section}>
             <div style={styles.sectionLabel}>PATIENT RISKS</div>
@@ -134,64 +149,73 @@ function Results() {
           </div>
         )}
 
-        {interactions.length === 0 && doseWarnings.length === 0 && foodWarnings.length === 0 && riskWarnings.length === 0 && (
+        {interactions.length === 0 && doseWarnings.length === 0 && foodWarnings.length === 0 && riskWarnings.length === 0 && saturations.length === 0 && (
           <div style={styles.safeCard}>
             ✅ No risks detected.
           </div>
         )}
-        {symptoms.length > 0 && (
-  <div style={styles.section}>
-    <div style={styles.sectionLabel}>SYMPTOM ANALYSIS</div>
-    {symptoms.map((symptom, i) => {
-      const drugNames = drugs.map(d => d.name.toLowerCase());
-const sideEffectsMap = {
-  'sertraline': ['nausea', 'insomnia', 'sweating', 'tremor', 'sexual dysfunction'],
-  'fluoxetine': ['nausea', 'insomnia', 'anxiety', 'headache', 'sexual dysfunction'],
-  'escitalopram': ['nausea', 'insomnia', 'sexual dysfunction', 'fatigue'],
-  'paroxetine': ['nausea', 'sexual dysfunction', 'weight gain', 'sedation', 'sweating'],
-  'venlafaxine': ['nausea', 'hypertension', 'insomnia', 'sweating'],
-  'duloxetine': ['nausea', 'dry mouth', 'constipation', 'fatigue', 'sweating'],
-  'bupropion': ['insomnia', 'dry mouth', 'headache', 'agitation'],
-  'mirtazapine': ['sedation', 'weight gain', 'dry mouth', 'dizziness'],
-  'amitriptyline': ['sedation', 'dry mouth', 'constipation', 'weight gain'],
-  'quetiapine': ['sedation', 'weight gain', 'dizziness'],
-  'aripiprazole': ['insomnia', 'nausea', 'restlessness', 'headache'],
-  'haloperidol': ['sedation'],
-  'lithium': ['tremor', 'weight gain'],
-  'valproate': ['weight gain', 'tremor', 'sedation'],
-  'diazepam': ['sedation', 'memory impairment'],
-};
-const allSideEffects = drugNames.flatMap(name => sideEffectsMap[name] || []).join(' ');
+        {symptoms.length > 0 && (() => {
+          const analyzedSymptoms = symptoms.map(symptom => {
+            const drugNames = drugs.map(d => d.name.toLowerCase());
+            const sideEffectsMap = {
+              'sertraline': ['nausea', 'insomnia', 'sweating', 'tremor', 'sexual dysfunction'],
+              'fluoxetine': ['nausea', 'insomnia', 'anxiety', 'headache', 'sexual dysfunction'],
+              'escitalopram': ['nausea', 'insomnia', 'sexual dysfunction', 'fatigue'],
+              'paroxetine': ['nausea', 'sexual dysfunction', 'weight gain', 'sedation', 'sweating'],
+              'venlafaxine': ['nausea', 'hypertension', 'insomnia', 'sweating'],
+              'duloxetine': ['nausea', 'dry mouth', 'constipation', 'fatigue', 'sweating'],
+              'bupropion': ['insomnia', 'dry mouth', 'headache', 'agitation'],
+              'mirtazapine': ['sedation', 'weight gain', 'dry mouth', 'dizziness'],
+              'amitriptyline': ['sedation', 'dry mouth', 'constipation', 'weight gain'],
+              'quetiapine': ['sedation', 'weight gain', 'dizziness'],
+              'aripiprazole': ['insomnia', 'nausea', 'restlessness', 'headache'],
+              'haloperidol': ['sedation'],
+              'lithium': ['tremor', 'weight gain'],
+              'valproate': ['weight gain', 'tremor', 'sedation'],
+              'diazepam': ['sedation', 'memory impairment'],
+            };
+            const allSideEffects = drugNames.flatMap(name => sideEffectsMap[name] || []).join(' ');
 
+            const symptomMap = {
+              'bulantı': 'nausea',
+              'baş dönmesi': 'dizziness',
+              'uykusuzluk': 'insomnia',
+              'kalp çarpıntısı': 'palpitation',
+              'nefes darlığı': 'respiratory',
+              'titreme': 'tremor',
+              'terleme': 'sweating',
+              'yorgunluk': 'fatigue',
+              'ağız kuruluğu': 'dry mouth',
+              'iştah kaybı': 'appetite',
+              'baş ağrısı': 'headache',
+              'sinirlilik': 'agitation',
+            };
+            const englishSymptom = symptomMap[symptom.toLowerCase()] || symptom.toLowerCase();
+            const isCommon = allSideEffects.includes(englishSymptom);
 
-      const symptomMap = {
-  'bulantı': 'nausea',
-  'baş dönmesi': 'dizziness',
-  'uykusuzluk': 'insomnia',
-  'kalp çarpıntısı': 'palpitation',
-  'nefes darlığı': 'respiratory',
-  'titreme': 'tremor',
-  'terleme': 'sweating',
-  'yorgunluk': 'fatigue',
-  'ağız kuruluğu': 'dry mouth',
-  'iştah kaybı': 'appetite',
-  'baş ağrısı': 'headache',
-  'sinirlilik': 'agitation',
-};
-const englishSymptom = symptomMap[symptom.toLowerCase()] || symptom.toLowerCase();
-const isCommon = allSideEffects.includes(englishSymptom);
+            return {
+              symptom: symptom,
+              isCommon: isCommon,
+              text: isCommon
+                ? `✓ "${symptom}" — is a commonly reported side effect of these medications. Consult your doctor if it persists.`
+                : `⚠️ "${symptom}" — is not directly associated with these medications. Consult your doctor if it persists.`
+            };
+          })
 
-      return (
-        <div key={i} style={isCommon ? styles.cautionCard : styles.dangerCard}>
-          {isCommon
-            ? `✓ "${symptom}" — is a commonly reported side effect of these medications. Consult your doctor if it persists.`
-            : `⚠️ "${symptom}" — is not directly associated with these medications. Consult your doctor if it persists.`
-          }
-        </div>
-      );
-    })}
-  </div>
-)}
+          analyzedSymptoms.sort((a, b) => a.isCommon === b.isCommon ? 0 : a.isCommon ? 1 : -1);
+
+          return (
+            <div style={styles.section}>
+              <div style={styles.sectionLabel}>SYMPTOM ANALYSIS</div>
+              {analyzedSymptoms.map((s, i) => (
+                <div key={i} style={s.isCommon ? styles.cautionCard : styles.dangerCard}>
+                  {s.text}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
+
         <div style={styles.disclaimer}>
           This system provides educational information only. It does not replace medical advice, diagnosis, or prescribing. In case of emergency, call 112.
         </div>
@@ -207,12 +231,12 @@ const isCommon = allSideEffects.includes(englishSymptom);
       <div style={styles.benchmarkCard}>
         <div style={styles.benchmarkName}>Psy-Med Advisor</div>
         <div style={styles.benchmarkStat}>⚡ {benchmarkResult.our_time}s</div>
-        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.our_result?.length} uyarı</div>
-        <div style={{...styles.benchmarkBadge, backgroundColor: '#e8f5e9', color: '#2d6a4f'}}>%100 tutarlı</div>
+        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.our_result?.length} warnings</div>
+        <div style={{...styles.benchmarkBadge, backgroundColor: '#e8f5e9', color: '#2d6a4f'}}>100% consistent</div>
         <div style={styles.warningList}>
           {benchmarkResult.our_result?.map((w, i) => (
             <div key={i} style={styles.warningItem}>
-              {typeof w === 'string' ? w : `${w.drugs?.[0]} + ${w.drugs?.[1]}: ${w.shared_pathway}`}
+              {typeof w === 'string' ? w : (w.type === 'saturation' ? w.message : `${w.drugs?.[0]} + ${w.drugs?.[1]}: ${w.shared_pathway}`)}
             </div>
           ))}
         </div>
@@ -220,8 +244,8 @@ const isCommon = allSideEffects.includes(englishSymptom);
       <div style={styles.benchmarkCard}>
         <div style={styles.benchmarkName}>Gemini</div>
         <div style={styles.benchmarkStat}>⚡ {benchmarkResult.gemini_time}s</div>
-        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.gemini_result?.length} uyarı</div>
-        <div style={{...styles.benchmarkBadge, backgroundColor: '#fff8e1', color: '#f57f17'}}>%{benchmarkResult.gemini_consistency} tutarlı</div>
+        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.gemini_result?.length} warnings</div>
+        <div style={{...styles.benchmarkBadge, backgroundColor: '#fff8e1', color: '#f57f17'}}>{benchmarkResult.gemini_consistency}% consistent</div>
         <div style={styles.warningList}>
           {benchmarkResult.gemini_result?.map((w, i) => (
             <div key={i} style={styles.warningItem}>{w}</div>
@@ -231,8 +255,8 @@ const isCommon = allSideEffects.includes(englishSymptom);
       <div style={styles.benchmarkCard}>
         <div style={styles.benchmarkName}>Groq</div>
         <div style={styles.benchmarkStat}>⚡ {benchmarkResult.groq_time}s</div>
-        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.groq_result?.length} uyarı</div>
-        <div style={{...styles.benchmarkBadge, backgroundColor: '#fff8e1', color: '#f57f17'}}>%{benchmarkResult.groq_consistency} tutarlı</div>
+        <div style={styles.benchmarkStat}>🎯 {benchmarkResult.groq_result?.length} warnings</div>
+        <div style={{...styles.benchmarkBadge, backgroundColor: '#fff8e1', color: '#f57f17'}}>{benchmarkResult.groq_consistency}% consistent</div>
         <div style={styles.warningList}>
           {benchmarkResult.groq_result?.map((w, i) => (
             <div key={i} style={styles.warningItem}>{w}</div>
@@ -241,23 +265,23 @@ const isCommon = allSideEffects.includes(englishSymptom);
       </div>
     </div>
     <div style={styles.chartsSection}>
-  <div style={styles.sectionLabel}>GRAFİKLER</div>
+  <div style={styles.sectionLabel}>CHARTS</div>
   <div style={styles.chartsGrid}>
     <img
       src="http://localhost:5000/benchmark/charts/speed_chart.png"
-      alt="Hız karşılaştırması"
+      alt="Speed comparison"
       style={styles.chartImg}
       onError={(e) => e.target.style.display='none'}
     />
     <img
       src="http://localhost:5000/benchmark/charts/consistency_chart.png"
-      alt="Tutarlılık karşılaştırması"
+      alt="Consistency comparison"
       style={styles.chartImg}
       onError={(e) => e.target.style.display='none'}
     />
     <img
       src="http://localhost:5000/benchmark/charts/warnings_chart.png"
-      alt="Uyarı sayısı"
+      alt="Warning count"
       style={styles.chartImg}
       onError={(e) => e.target.style.display='none'}
     />

@@ -1,3 +1,4 @@
+import ConditionSelector from "../components/ConditionSelector";
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
@@ -23,7 +24,7 @@ function Register() {
   const [age, setAge] = useState('');
   const [sex, setSex] = useState('');
   const [weight, setWeight] = useState('');
-  const [conditions, setConditions] = useState('');
+  const [conditions, setConditions] = useState([]);
   const [isPregnant, setIsPregnant] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
@@ -55,7 +56,7 @@ function Register() {
           sex,
           weight: parseFloat(weight),
           is_pregnant: isPregnant === true,
-          medical_conditions: conditions ? conditions.split(',').map(c => c.trim()) : []
+          medical_conditions: conditions
         }
       }, { withCredentials: true });
       navigate('/login');
@@ -72,12 +73,12 @@ function Register() {
           <h2 style={styles.title}>Create Account</h2>
           <p style={styles.subtitle}>Your information is stored securely.</p>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Kullanıcı Adı</label>
-            <input style={styles.input} type="text" placeholder="kullanici_adi"
+            <label style={styles.label}>Username</label>
+            <input style={styles.input} type="text" placeholder="username"
               value={username} onChange={e => setUsername(e.target.value)} />
           </div>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Şifre</label>
+            <label style={styles.label}>Password</label>
             <input style={styles.input} type="password" placeholder="••••••••"
               value={password} onChange={e => setPassword(e.target.value)} />
           </div>
@@ -88,8 +89,10 @@ function Register() {
           <h2 style={styles.title}>How old are you?</h2>
           <p style={styles.subtitle}>Used for dose assessment.</p>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Yaş</label>
-            <input style={styles.input} type="number" placeholder="örn: 32"
+            <label style={styles.label}>Age</label>
+            <input style={styles.input} type="number" placeholder="e.g., 32"
+              min="0"
+              onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
               value={age} onChange={e => setAge(e.target.value)} />
           </div>
         </>
@@ -111,8 +114,10 @@ function Register() {
           <h2 style={styles.title}>What is your weight?</h2>
           <p style={styles.subtitle}>Dose ranges may vary by weight.</p>
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Kilo (kg)</label>
-            <input style={styles.input} type="number" placeholder="örn: 68"
+            <label style={styles.label}>Weight (kg)</label>
+            <input style={styles.input} type="number" placeholder="e.g., 68"
+              min="0"
+              onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
               value={weight} onChange={e => setWeight(e.target.value)} />
           </div>
         </>
@@ -123,10 +128,8 @@ function Register() {
           <p style={styles.subtitle}>Leave blank if none.</p>
           <div style={styles.inputGroup}>
             <label style={styles.label}>Conditions</label>
-            <input style={styles.input} type="text"
-              placeholder="örn: diabetes, hypertension"
-              value={conditions} onChange={e => setConditions(e.target.value)} />
-            <p style={styles.hint}>Separate multiple conditions with a comma</p>
+            <ConditionSelector selectedConditions={conditions} onChange={setConditions} />
+            <p style={styles.hint}>Search and select conditions from the list</p>
           </div>
         </>
       );

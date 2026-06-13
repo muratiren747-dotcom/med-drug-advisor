@@ -212,7 +212,7 @@ def get_history(username):
 
     return [{"id": row["id"],
              "analysis_result": json.loads(row["analysis_result"]),
-             "created_at": row["created_at"].replace("","T") + "Z"} for row in rows]
+             "created_at": row["created_at"].replace(" ","T") + "Z"} for row in rows]
 
 def delete_user_account(username):
     """

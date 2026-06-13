@@ -21,46 +21,54 @@ function Sidebar() {
   };
 
   return (
-    <div style={styles.sidebar}>
-      <div style={styles.logo}>
-        <span style={styles.logoIcon}></span>
-        <span style={styles.logoText}>Psy-Med</span>
-      </div>
-
-      <div style={styles.userBox}>
-        <div style={styles.avatar}>{initials}</div>
-        <div>
-          <div style={styles.userName}>{username}</div>
-          <div style={styles.userRole}>Patient</div>
+      <div style={styles.sidebar}>
+        <div style={styles.logo}>
+          <span style={styles.logoIcon}></span>
+          <span style={styles.logoText}>Psy-Med</span>
         </div>
+
+        <div style={styles.userBox}>
+          <div style={styles.avatar}>{initials}</div>
+          <div>
+            <div style={styles.userName}>{username}</div>
+            <div style={styles.userRole}>Patient</div>
+          </div>
+        </div>
+
+        <div style={styles.divider}/>
+
+        <nav style={styles.nav}>
+          {menuItems.map((item) => (
+              <Link
+                  key={item.path}
+                  to={item.path}
+                  style={{
+                    ...styles.menuItem,
+                    ...(location.pathname === item.path ? styles.menuItemActive : {})
+                  }}
+              >
+                <span style={styles.menuIcon}>{item.icon}</span>
+                <span>{item.label}</span>
+              </Link>
+          ))}
+
+          {/* Araya giren şık ince çizgimiz */}
+          <div style={styles.divider}/>
+
+          {/* marginTop silinip çizgiyle uyumlu hale getirilen Logout butonu */}
+          <button style={{
+            ...styles.menuItem,
+            backgroundColor: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            width: '100%',
+            textAlign: 'left'
+          }} onClick={handleLogout}>
+            <span style={styles.menuIcon}>🚪</span>
+            <span>Logout</span>
+          </button>
+        </nav>
       </div>
-
-      <div style={styles.divider} />
-
-      <nav style={styles.nav}>
-        {menuItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            style={{
-              ...styles.menuItem,
-              ...(location.pathname === item.path ? styles.menuItemActive : {})
-            }}
-          >
-            <span style={styles.menuIcon}>{item.icon}</span>
-            <span>{item.label}</span>
-          </Link>
-        ))}
-      </nav>
-
-      <div style={styles.bottom}>
-        <div style={styles.divider} />
-        <button style={styles.logoutBtn} onClick={handleLogout}>
-          <span>🚪</span>
-          <span>Çıkış</span>
-        </button>
-      </div>
-    </div>
   );
 }
 
@@ -151,24 +159,7 @@ const styles = {
     color: 'white',
     fontWeight: '600',
   },
-  menuIcon: { fontSize: '1rem' },
-  bottom: {
-    marginTop: 'auto',
-  },
-  logoutBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.8rem',
-    padding: '0.7rem 0.8rem',
-    borderRadius: '8px',
-    color: 'rgba(255,255,255,0.6)',
-    backgroundColor: 'transparent',
-    border: 'none',
-    cursor: 'pointer',
-    fontSize: '0.9rem',
-    width: '100%',
-    marginTop: '0.5rem',
-  },
+  menuIcon: { fontSize: '1rem' }
 };
 
 export default Sidebar;
