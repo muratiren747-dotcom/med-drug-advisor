@@ -61,7 +61,7 @@ function Register() {
       }, { withCredentials: true });
       navigate('/login');
     } catch (err) {
-      setError('Registration failed. This username may already be taken.');
+      setError(err.response?.data?.error || 'Registration failed. This username may already be taken.');
       setStep(1);
     }
   };

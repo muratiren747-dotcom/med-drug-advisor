@@ -9,13 +9,10 @@ function DrugInput({ index, drug, drugList, onChange, onRemove }) {
 
   const handleNameChange = (value) => {
     onChange(index, 'name', value);
-    if (value.length >= 1) {
-      const filtered = drugList.filter(d => d.toLowerCase().startsWith(value.toLowerCase()));
-      setSuggestions(filtered);
-      setShowSuggestions(true);
-    } else {
-      setShowSuggestions(false);
-    }
+    // Boşken: tüm liste. Harf varken: o harfle başlayanlar.
+    const filtered = drugList.filter(d => d.toLowerCase().startsWith(value.toLowerCase()));
+    setSuggestions(filtered);
+    setShowSuggestions(true);
   };
 
   const selectSuggestion = (name) => {
@@ -35,6 +32,11 @@ function DrugInput({ index, drug, drugList, onChange, onRemove }) {
               type="text"
               placeholder="Drug name (e.g., Sertraline)"
               value={drug.name}
+              onFocus={() => {
+                // Boş tıklayınca tüm listeyi göster
+                setSuggestions(drugList);
+                setShowSuggestions(true);
+              }}
               onChange={(e) => handleNameChange(e.target.value)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
               autoComplete="off"
@@ -248,7 +250,7 @@ const styles = {
   inputGroup: { flex: 2, display: 'flex', flexDirection: 'column', gap: '0.3rem' },
   label: { fontSize: '0.85rem', fontWeight: '600', color: '#374151' },
   input: { padding: '0.8rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', outline: 'none', width: '100%', boxSizing: 'border-box' },
-  dropdown: { position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid #d1d5db', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100, marginTop: '2px' },
+  dropdown: { position: 'absolute', top: '100%', left: 0, right: 0, backgroundColor: 'white', border: '1px solid #d1d5db', borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', zIndex: 100, marginTop: '2px', maxHeight: '220px', overflowY: 'auto' },
   dropdownItem: { padding: '0.7rem 1rem', cursor: 'pointer', fontSize: '0.95rem', color: '#1a3d2b', borderBottom: '0.5px solid #f3f4f6' },
   doseWrapper: { display: 'flex', alignItems: 'center', gap: '0.5rem' },
   doseInput: { flex: 1, padding: '0.8rem', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '1rem', outline: 'none' },
@@ -290,4 +292,3 @@ tagActive: {
 };
 
 export default Analyze;
-

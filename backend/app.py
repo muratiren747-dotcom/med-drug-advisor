@@ -36,7 +36,7 @@ def create_app():
     app.config["SESSION_COOKIE_SECURE"] = True
 
     # Securely configures CORS to allow authenticated requests from the frontend origin
-    CORS(app, supports_credentials=True, origins=["http://localhost:3000", "https://med-drug-advisor-h72zztgy6-durg-med-advisor.vercel.app"])
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000", "https://med-drug-advisor.vercel.app"])
 
     # Modular routing architecture: Each blueprint is registered with an API prefix
     app.register_blueprint(auth_bp,     url_prefix="/api")

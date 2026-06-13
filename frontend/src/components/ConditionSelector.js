@@ -73,7 +73,7 @@ const ConditionSelector = ({ selectedConditions, onChange }) => {
                     style={{ width: '100%', padding: '0.8rem', borderRadius: '8px', border: '1px solid #d1d5db', boxSizing: 'border-box', fontSize: '0.95rem' }}
                 />
 
-                {isOpen && inputValue && filteredConditions.length > 0 && (
+                {isOpen && filteredConditions.length > 0 && (
                     <ul style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: '1px solid #d1d5db', borderRadius: '0 0 8px 8px', listStyle: 'none', padding: 0, margin: 0, zIndex: 10, maxHeight: '200px', overflowY: 'auto', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
                         {filteredConditions.map(cond => (
                             <li
