@@ -35,7 +35,7 @@ def create_app():
     limiter.init_app(app)
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "364ddea40c41d998d9c23c4d18b6f42351a8ab9107e3007a")
-    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_SAMESITE"] = "None"
     app.config["SESSION_COOKIE_SECURE"] = True
 
     # Securely configures CORS to allow authenticated requests from the frontend origin
