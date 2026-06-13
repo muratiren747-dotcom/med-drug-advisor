@@ -154,7 +154,6 @@ const toggleSymptom = (symptom) => {
       <div style={styles.container}>
         <h2 style={styles.title}>Drug Analysis</h2>
         <p style={styles.subtitle}>
-          Kullandığınız ilaçları ve günlük dozlarını girin.
           Enter your medications and daily doses.
           Our system analyzes interactions using FDA-approved data.
         </p>
