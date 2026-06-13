@@ -41,7 +41,7 @@ function DrugInput({ index, drug, onChange, onRemove }) {
             <input
               style={styles.input}
               type="text"
-              placeholder="Drug name (örn: Sertraline)"
+              placeholder="Drug name (e.g., Sertraline)"
               value={drug.name}
               onChange={(e) => handleNameChange(e.target.value)}
               onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
@@ -71,6 +71,7 @@ function DrugInput({ index, drug, onChange, onRemove }) {
               type="number"
               placeholder="100"
               min="1"
+              onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
               value={drug.daily_dose}
               onChange={(e) => onChange(index, 'daily_dose', e.target.value)}
             />

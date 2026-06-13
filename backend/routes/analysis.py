@@ -55,12 +55,14 @@ def analyze():
         drug_objects.append(drug_db[name])
 
         try:
-            daily_doses[name] = float(entry.get("daily_dose", 0))
+            dose = float(entry.get("daily_dose", 0))
         except (ValueError, TypeError):
-            daily_doses[name] = 0.0
+            dose = 0.0
 
-    if invalid:
-        return jsonify({"error": f"unknown drugs: {invalid}"}), 400
+        if dose < 0:
+            return jsonify({"error": f"dose for {name} cannot be negative"}), 400
+
+        daily_doses[name] = dose
 
     # The core analysis engine is triggered independently.
     raw_report = analyzer.analyze(patient, drug_objects, daily_doses)
@@ -91,51 +93,19 @@ def analyze():
     enzymes_list = ["CYP2D6", "CYP3A4", "CYP2C19", "CYP2C9", "CYP1A2", "CYP2B6"]
 
     for item in raw_report.get("interactions", []):
-        explanation = item.get("explanation", "")
-        severity = item.get("severity", "DANGER")
-
-        flat_warnings.append(f"{severity}: {explanation}")
-
-        involved = [d.name for d in drug_objects if d.name.lower() in explanation.lower()]
-        if len(involved) < 2:
-            involved = [d.name for d in drug_objects]
-            while len(involved) < 2:
-                involved.append("Unknown Drug")
-
-        shared = "CYP Pathway"
-        for e in enzymes_list:
-            if e.lower() in explanation.lower():
-                shared = e
-                break
-
         flat_warnings.append({
-            "drugs": involved[:2],
-            "shared_pathway": shared,
-            "severity": severity
+            "type": "interaction",
+            "drugs": item.get("involved_drugs", []),
+            "shared_pathway": item.get("pathway", "CYP Pathway"),
+            "severity": item.get("severity", "DANGER"),
+            "message": item.get("explanation", "")
         })
 
     for item in raw_report.get("substrate_saturation", []):
-        explanation = item.get("explanation", "")
-        severity = item.get("severity", "INFO")
-
-        flat_warnings.append(f"{severity}: {explanation}")
-
-        involved = [d.name for d in drug_objects if d.name.lower() in explanation.lower()]
-        if len(involved) < 2:
-            involved = [d.name for d in drug_objects]
-            while len(involved) < 2:
-                involved.append("Unknown Drug")
-
-        shared = "CYP Pathway"
-        for e in enzymes_list:
-            if e.lower() in explanation.lower():
-                shared = e
-                break
-
         flat_warnings.append({
-            "drugs": involved[:2],
-            "shared_pathway": shared,
-            "severity": severity
+            "type": "saturation",
+            "severity": item.get("severity", "INFO"),
+            "message": item.get("explanation", "")
         })
 
     # DATABASE PERSISTENCE & RESPONSE
@@ -143,7 +113,29 @@ def analyze():
     # table for future retrieval, followed by returning an HTTP 200 JSON response.
     final_payload = {
         "warnings": flat_warnings,
-        "drugs": [d.name for d in drug_objects]
+        "drugs": [f"{d.name} . {daily_doses.get(d.name, 0)} mg" for d in drug_objects]
     }
     database_mgr.save_history(session["username"], final_payload)
     return jsonify(final_payload)
+
+
+@analysis_bp.route("/conditions", methods=["GET"])
+def get_available_conditions():
+    """
+    =========================================================================
+    DYNAMIC CONDITIONS ENDPOINT
+    Parses the drugs.json knowledge base dynamically to extract all unique
+    risk factors. Prevents hardcoding in the frontend.
+    =========================================================================
+    """
+    import os
+    drugs_path = os.path.join(os.path.dirname(__file__), '..', 'drugs.json')
+    drug_db = database_mgr.load_drug_database(drugs_path)
+
+    conditions_set = set()
+    for drug in drug_db.values():
+        for condition in drug.risk_factors.keys():
+            conditions_set.add(condition)
+
+    # conditions_set is turned into the list and sorted alphabetically, returned in the JSON format.
+    return jsonify(sorted(list(conditions_set)))

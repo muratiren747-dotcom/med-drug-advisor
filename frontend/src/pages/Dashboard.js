@@ -21,7 +21,7 @@ function Dashboard() {
   const lastWarningText = lastWarning
     ? (typeof lastWarning === 'string'
         ? lastWarning.split(':')[0]
-        : lastWarning.severity || 'Uyarı')
+        : lastWarning.severity || 'Warning')
     : '—';
 
   return (
@@ -31,20 +31,22 @@ function Dashboard() {
         <p style={styles.subtitle}>How are you today?</p>
 
         <div style={styles.cardGrid}>
-          <div style={styles.card}>
-            <div style={styles.cardIcon}>💉</div>
-            <div style={styles.cardValue}>{lastAnalysis}</div>
-          </div>
-          <div style={styles.card}>
-            <div style={styles.cardIcon}>📋</div>
-            <div style={styles.cardValue}>{totalAnalysis}</div>
-          </div>
-          <div style={styles.card}>
-            <div style={styles.cardIcon}>⚠️</div>
-            <div style={styles.cardLabel}>Last Warning</div>
-            <div style={styles.cardValue} style={{fontSize: '0.9rem'}}>{lastWarningText}</div>
-          </div>
+        <div style={styles.card}>
+          <div style={styles.cardIcon}>💉</div>
+          <div style={styles.cardLabel}>Last Analysis</div>
+          <div style={styles.cardValue}>{lastAnalysis}</div>
         </div>
+        <div style={styles.card}>
+          <div style={styles.cardIcon}>📋</div>
+          <div style={styles.cardLabel}>Total Analyses</div>
+          <div style={styles.cardValue}>{totalAnalysis}</div>
+        </div>
+        <div style={styles.card}>
+          <div style={styles.cardIcon}>⚠️</div>
+          <div style={styles.cardLabel}>Last Warning</div>
+          <div style={styles.cardValue} style={{fontSize: '0.9rem'}}>{lastWarningText}</div>
+        </div>
+      </div>
 
         {history.length > 0 && (
           <div style={styles.recentSection}>
@@ -59,7 +61,7 @@ function Dashboard() {
                     {new Date(item.created_at).toLocaleDateString('tr-TR')}
                   </span>
                   <span style={styles.recentWarnings}>
-                    {item.analysis_result?.warnings?.length || 0} uyarı
+                    {item.analysis_result?.warnings?.length || 0} Warnings
                   </span>
                 </div>
               </div>

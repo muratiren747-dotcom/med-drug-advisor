@@ -13,14 +13,45 @@ function History() {
   }, []);
 
   const warnings = selected?.analysis_result?.warnings || [];
-  const interactions = warnings.filter(w => typeof w === 'object' && w.drugs);
-  const doseWarnings = warnings.filter(w => typeof w === 'string' && (w.includes('within range') || w.includes('exceeds')));
-  const foodWarnings = warnings.filter(w => typeof w === 'string' && w.includes('Avoid'));
-  const riskWarnings = warnings.filter(w => typeof w === 'string' && !w.includes('within range') && !w.includes('exceeds') && !w.includes('Avoid'));
+
+  // 1. Sıralama Fonksiyonları
+  const severityRank = (w) => {
+    const t = typeof w === 'string' ? w : (w.severity || '');
+    if (t.startsWith('DANGER') || t.includes('DO NOT USE')) return 0;
+    if (t.startsWith('CAUTION')) return 1;
+    return 2;
+  };
+  const bySeverity = (a, b) => severityRank(a) - severityRank(b);
+
+  // 2. Filtreler ve Sıralamalar (Güvenli, tekil tanımlama)
+  const interactions = warnings
+    .filter(w => typeof w === 'object' && (w.type === 'interaction' || (w.drugs && w.type !== 'saturation')))
+    .sort(bySeverity);
+
+  const saturations = warnings
+    .filter(w => typeof w === 'object' && w.type === 'saturation')
+    .sort(bySeverity);
+
+  const doseWarnings = warnings
+    .filter(w => typeof w === 'string' && (w.includes('range') || w.includes('exceeds') || w.includes('dose') || w.includes('too high')))
+    .sort(bySeverity);
+
+  const foodWarnings = warnings
+    .filter(w => typeof w === 'string' && w.includes('Avoid'))
+    .sort(bySeverity);
+
+  const riskWarnings = warnings
+    .filter(w => typeof w === 'string'
+      && !w.includes('range') && !w.includes('exceeds') && !w.includes('dose') && !w.includes('too high')
+      && !w.includes('Avoid')
+      && !w.includes('CYP') && !w.includes('pathway')
+    )
+    .sort(bySeverity);
 
   const getSeverityStyle = (text) => {
-    if (text.startsWith('DANGER') || text.includes('DO NOT USE')) return styles.dangerCard;
-    if (text.startsWith('CAUTION')) return styles.cautionCard;
+    const t = typeof text === 'string' ? text : (text.severity || '');
+    if (t.startsWith('DANGER') || t.includes('DO NOT USE')) return styles.dangerCard;
+    if (t.startsWith('CAUTION')) return styles.cautionCard;
     return styles.infoCard;
   };
 
@@ -33,7 +64,7 @@ function History() {
             <h2 style={styles.title}>History</h2>
             <p style={styles.subtitle}>Your previous analyses</p>
 
-            {loading && <p style={styles.loading}>Yükleniyor...</p>}
+            {loading && <p style={styles.loading}>Loading...</p>}
 
             {!loading && history.length === 0 && (
               <div style={styles.emptyBox}>
@@ -51,7 +82,7 @@ function History() {
                     })}
                   </span>
                   <span style={styles.warningCount}>
-                    {item.analysis_result?.warnings?.length || 0} uyarı
+                    {item.analysis_result?.warnings?.length || 0} warnings
                   </span>
                 </div>
                 <div style={styles.drugs}>
@@ -93,10 +124,10 @@ function History() {
                 {interactions.map((w, i) => (
                   <div key={i}>
                     <p style={styles.dangerText}>
-                      <strong>{w.drugs[0]}</strong> ve <strong>{w.drugs[1]}</strong> shares the metabolic pathway: <strong>{Array.isArray(w.shared_pathway) ? w.shared_pathway.join(', ') : w.shared_pathway}</strong>
+                      <strong>{w.drugs[0]}</strong> and <strong>{w.drugs[1]}</strong> shares the metabolic pathway: <strong>{Array.isArray(w.shared_pathway) ? w.shared_pathway.join(', ') : w.shared_pathway}</strong>
                     </p>
                     <p style={styles.dangerSubText}>
-                      CYP2D6 is an enzyme in the liver that metabolizes drugs. When two drugs share the same enzyme, one may slow the metabolism of the other — leading to increased drug levels in the blood and higher risk of side effects.
+                      This may affect drug blood levels and lead to unexpected side effects.
                     </p>
                   </div>
                 ))}
@@ -125,6 +156,17 @@ function History() {
               </div>
             )}
 
+            {saturations.length > 0 && (
+              <div style={styles.section}>
+                <div style={styles.sectionLabel}>ENZYMATIC & METABOLIC DYNAMICS</div>
+                {saturations.map((w, i) => (
+                  <div key={i} style={getSeverityStyle(w.severity)}>
+                    {w.message}
+                  </div>
+                ))}
+              </div>
+            )}
+
             {riskWarnings.length > 0 && (
               <div style={styles.section}>
                 <div style={styles.sectionLabel}>PATIENT RISKS</div>
@@ -136,7 +178,7 @@ function History() {
               </div>
             )}
 
-            {warnings.length === 0 && (
+            {interactions.length === 0 && doseWarnings.length === 0 && foodWarnings.length === 0 && riskWarnings.length === 0 && saturations.length === 0 && (
               <div style={styles.safeCard}>✅ No risks were detected in this analysis.</div>
             )}
 
