@@ -34,7 +34,7 @@ def create_app():
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-CHANGE-ME")
 
     # Securely configures CORS to allow authenticated requests from the frontend origin
-    CORS(app, supports_credentials=True, origins=["http://localhost:3000"])
+    CORS(app, supports_credentials=True, origins=["http://localhost:3000", "https://med-drug-advisor-h72zztgy6-durg-med-advisor.vercel.app"])
 
     # Modular routing architecture: Each blueprint is registered with an API prefix
     app.register_blueprint(auth_bp,     url_prefix="/api")
