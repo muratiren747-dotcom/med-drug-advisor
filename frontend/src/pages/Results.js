@@ -6,7 +6,6 @@ function Results() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [benchmarkResult, setBenchmarkResult] = useState(null);
-  const [benchmarkDone, setBenchmarkDone] = useState(false);
   const [loading, setLoading] = useState(false);
 
   if (!state) { navigate('/analyze'); return null; }
@@ -220,8 +219,16 @@ function Results() {
           This system provides educational information only. It does not replace medical advice, diagnosis, or prescribing. In case of emergency, call 112.
         </div>
 
-        <button style={styles.benchmarkButton} onClick={handleBenchmark} disabled={loading}>
-          {loading ? '⏳ Comparing with AI...' : '🤖 Compare with AI'}
+        <button
+          style={{
+            ...styles.benchmarkButton,
+            backgroundColor: benchmarkDone ? '#1D9E75' : '#378ADD',
+            cursor: benchmarkDone ? 'default' : 'pointer'
+          }}
+          onClick={handleBenchmark}
+          disabled={loading || benchmarkDone}
+        >
+          {loading ? '⏳ Comparing with AI...' : (benchmarkDone ? '✅ Benchmark Completed' : '🤖 Compare with AI')}
         </button>
 
         {benchmarkResult && !benchmarkResult.error && (

@@ -44,7 +44,7 @@ function Dashboard() {
         <div style={styles.card}>
           <div style={styles.cardIcon}>⚠️</div>
           <div style={styles.cardLabel}>Last Warning</div>
-          <div style={styles.cardValue} style={{fontSize: '0.9rem'}}>{lastWarningText}</div>
+          <div style={{ ...styles.cardValue, fontSize: '0.9rem' }}>{lastWarningText}</div>
         </div>
       </div>
 
