@@ -127,7 +127,6 @@ def run_single_benchmark(drug_entries, patient_data, our_result, our_time=0.02):
         result, t = call_gemini(drug_entries, patient_data)
         gemini_runs.append(result)
         gemini_times.append(t)
-        time.sleep(2)
 
     groq_runs, groq_times = [], []
     for i in range(NUM_RUNS):
