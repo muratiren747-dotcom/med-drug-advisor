@@ -6,6 +6,7 @@ function Results() {
   const { state } = useLocation();
   const navigate = useNavigate();
   const [benchmarkResult, setBenchmarkResult] = useState(null);
+  const [benchmarkDone, setBenchmarkDone] = useState(false);
   const [loading, setLoading] = useState(false);
 
   if (!state) { navigate('/analyze'); return null; }
