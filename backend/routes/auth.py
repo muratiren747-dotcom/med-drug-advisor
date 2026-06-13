@@ -34,10 +34,10 @@ def register():
 
     age = patient_info.get("age")
     weight = patient_info.get("weight")
-    if age is not None and age < 0:
-        return jsonify({"error": "age cannot be negative"}), 400
-    if weight is not None and weight < 0:
-        return jsonify({"error": "weight cannot be negative"}), 400
+    if age is not None and age <= 0:
+        return jsonify({"error": "age must be greater than zero"}), 400
+    if weight is not None and weight <= 0:
+        return jsonify({"error": "weight must be greater than zero"}), 400
 
     ok = database_mgr.create_user_account(username, password, patient_info)
     if not ok:

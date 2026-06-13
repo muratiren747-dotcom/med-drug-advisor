@@ -136,3 +136,21 @@ def get_available_conditions():
 
     # conditions_set is turned into the list and sorted alphabetically, returned in the JSON format.
     return jsonify(sorted(list(conditions_set)))
+
+@analysis_bp.route("/drugs", methods=["GET"])
+def get_available_drugs():
+    """
+    =========================================================================
+    DYNAMIC DRUG LIST ENDPOINT
+    Parses drugs.json and returns the list of supported drug names.
+    The frontend autocomplete fetches this so it always stays in sync
+    with the knowledge base — no hardcoded list to maintain.
+    =========================================================================
+    """
+    import os
+    drugs_path = os.path.join(os.path.dirname(__file__), '..', 'drugs.json')
+    drug_db = database_mgr.load_drug_database(drugs_path)
+
+    # drug_db keys are lowercased; return the proper-cased .name from each Drug
+    drug_names = sorted(drug.name for drug in drug_db.values())
+    return jsonify(drug_names)

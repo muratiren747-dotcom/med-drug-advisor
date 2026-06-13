@@ -1,24 +1,16 @@
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const DRUG_LIST = [
-  'Sertraline', 'Fluoxetine', 'Escitalopram', 'Paroxetine',
-  'Venlafaxine', 'Duloxetine', 'Bupropion', 'Mirtazapine',
-  'Amitriptyline', 'Quetiapine', 'Aripiprazole', 'Haloperidol',
-  'Lithium', 'Valproate', 'Diazepam'
-];
 
-function DrugInput({ index, drug, onChange, onRemove }) {
+function DrugInput({ index, drug, drugList, onChange, onRemove }) {
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const handleNameChange = (value) => {
     onChange(index, 'name', value);
     if (value.length >= 1) {
-      const filtered = DRUG_LIST.filter(d =>
-        d.toLowerCase().startsWith(value.toLowerCase())
-      );
+      const filtered = drugList.filter(d => d.toLowerCase().startsWith(value.toLowerCase()));
       setSuggestions(filtered);
       setShowSuggestions(true);
     } else {
@@ -101,10 +93,17 @@ function DrugInput({ index, drug, onChange, onRemove }) {
 
 function Analyze() {
   const [drugs, setDrugs] = useState([{ name: '', daily_dose: '' }]);
+  const [drugList, setDrugList] = useState([]);
   const [smoking, setSmoking] = useState(false);
   const [symptoms, setSymptoms] = useState([]);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    axios.get('https://med-drug-backend.onrender.com/api/drugs', { withCredentials: true })
+      .then(res => setDrugList(res.data))
+      .catch(() => setDrugList([]));
+  }, []);
 
   const addDrug = () => {
     if (drugs.length < 5) setDrugs([...drugs, { name: '', daily_dose: '' }]);
@@ -144,7 +143,7 @@ const toggleSymptom = (symptom) => {
 
       navigate('/results', { state: { result: response.data, drugs: validDrugs, symptoms } });
     } catch (err) {
-      setError('Analysis failed. Please check the drug names.');
+      setError(err.response?.data?.error || 'Analysis failed. Please check the drug names.');
     }
   };
 
@@ -167,6 +166,7 @@ const toggleSymptom = (symptom) => {
               key={index}
               index={index}
               drug={drug}
+              drugList={drugList}
               onChange={updateDrug}
               onRemove={removeDrug}
             />

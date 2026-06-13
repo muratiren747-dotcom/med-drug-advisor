@@ -13,7 +13,6 @@ from flask import Blueprint, request, jsonify, session
 from core import database_mgr
 from routes import require_login
 
-# İŞTE SUNUCUNUN ÇÖKMESİNE SEBEP OLAN SİLİNMİŞ SATIR BURASIYDI :)
 profile_bp = Blueprint("profile", __name__)
 
 @profile_bp.route("/profile", methods=["GET"])
@@ -55,10 +54,10 @@ def update_profile():
 
     age = patient_info.get("age")
     weight = patient_info.get("weight")
-    if age is not None and age < 0:
-        return jsonify({"error": "age cannot be negative"}), 400
-    if weight is not None and weight < 0:
-        return jsonify({"error": "weight cannot be negative"}), 400
+    if age is not None and age <= 0:
+        return jsonify({"error": "age must be greater than zero"}), 400
+    if weight is not None and weight <= 0:
+        return jsonify({"error": "weight must be greater than zero"}), 400
 
     ok = database_mgr.update_user_profile(username, patient_info)
     if not ok:

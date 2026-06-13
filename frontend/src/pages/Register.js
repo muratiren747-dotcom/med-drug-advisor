@@ -35,9 +35,9 @@ function Register() {
     if (step === 1 && (!username || !password)) {
       setError('Username and password are required.'); return;
     }
-    if (step === 2 && !age) { setError('Please enter your age.'); return; }
+    if (step === 2 && (!age || parseInt(age) <= 0)) {setError('Please enter a valid age (greater than 0).'); return;}
     if (step === 3 && !sex) { setError('Please select your gender'); return; }
-    if (step === 4 && !weight) { setError('Please enter your weight.'); return; }
+    if (step === 4 && (!weight || parseFloat(weight) <= 0)) {setError('Please enter a valid weight (greater than 0).'); return;}
     if (step === 5) {
       if (sex === 'female') { setStep(6); return; }
       else { handleRegister(); return; }

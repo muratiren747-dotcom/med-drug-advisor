@@ -28,6 +28,13 @@ function Profile() {
   }, []);
 
   const handleUpdate = async () => {
+    const numAge = parseInt(age);
+    const numWeight = parseInt(weight);
+
+    if (!age || !weight || numAge <= 0 || numWeight <= 0) {
+      setMessage("Lütfen geçerli bir yaş ve ağırlık değeri girin (0'dan büyük olmalı).");
+      return;
+    }
     try {
       await axios.put('https://med-drug-backend.onrender.com/api/profile', {
         age: parseInt(age),
