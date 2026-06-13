@@ -64,17 +64,17 @@ function Benchmark() {
               <div style={styles.sectionLabel}>CHARTS</div>
               <div style={styles.chartsGrid}>
                 <div style={styles.chartBox}>
-                  <img src={`http://localhost:5000/benchmark/charts/speed_chart.png?t=${Date.now()}`}
+                  <img src={`https://med-drug-backend.onrender.com/benchmark/charts/speed_chart.png?t=${Date.now()}`}
                     alt="Hız karşılaştırması" style={styles.chartImg}
                     onError={(e) => e.target.style.display='none'} />
                 </div>
                 <div style={styles.chartBox}>
-                  <img src={`http://localhost:5000/benchmark/charts/consistency_chart.png?t=${Date.now()}`}
+                  <img src={`https://med-drug-backend.onrender.com/benchmark/charts/consistency_chart.png?t=${Date.now()}`}
                     alt="Tutarlılık" style={styles.chartImg}
                     onError={(e) => e.target.style.display='none'} />
                 </div>
                 <div style={styles.chartBox}>
-                  <img src={`http://localhost:5000/benchmark/charts/warnings_chart.png?t=${Date.now()}`}
+                  <img src={`https://med-drug-backend.onrender.com/benchmark/charts/warnings_chart.png?t=${Date.now()}`}
                     alt="Uyarı sayısı" style={styles.chartImg}
                     onError={(e) => e.target.style.display='none'} />
                 </div>

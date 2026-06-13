@@ -7,7 +7,7 @@ function History() {
   const [selected, setSelected] = useState(null);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/history', { withCredentials: true })
+    axios.get('https://med-drug-backend.onrender.com/api/history', { withCredentials: true })
       .then(res => { setHistory(res.data); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);

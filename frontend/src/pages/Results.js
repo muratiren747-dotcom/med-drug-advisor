@@ -56,7 +56,7 @@ function Results() {
   const handleBenchmark = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/benchmark', {
+      const response = await axios.post('https://med-drug-backend.onrender.com/api/benchmark', {
         drugs: drugs.map(d => d.name),
         patient: {},
         our_result: warnings
@@ -268,19 +268,19 @@ function Results() {
   <div style={styles.sectionLabel}>CHARTS</div>
   <div style={styles.chartsGrid}>
     <img
-      src="http://localhost:5000/benchmark/charts/speed_chart.png"
+      src="https://med-drug-backend.onrender.com/benchmark/charts/speed_chart.png"
       alt="Speed comparison"
       style={styles.chartImg}
       onError={(e) => e.target.style.display='none'}
     />
     <img
-      src="http://localhost:5000/benchmark/charts/consistency_chart.png"
+      src="https://med-drug-backend.onrender.com/benchmark/charts/consistency_chart.png"
       alt="Consistency comparison"
       style={styles.chartImg}
       onError={(e) => e.target.style.display='none'}
     />
     <img
-      src="http://localhost:5000/benchmark/charts/warnings_chart.png"
+      src="https://med-drug-backend.onrender.com/benchmark/charts/warnings_chart.png"
       alt="Warning count"
       style={styles.chartImg}
       onError={(e) => e.target.style.display='none'}

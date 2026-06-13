@@ -10,7 +10,7 @@ const ConditionSelector = ({ selectedConditions, onChange }) => {
 
     // Bileşen ekrana geldiğinde API'den hastalıkları çek
     useEffect(() => {
-        axios.get('http://localhost:5000/api/conditions', { withCredentials: true })
+        axios.get('https://med-drug-backend.onrender.com/api/conditions', { withCredentials: true })
             .then(res => setAvailableConditions(res.data))
             .catch(err => console.error("Hastalıklar yüklenemedi:", err));
     }, []);

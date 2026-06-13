@@ -121,7 +121,7 @@ const toggleSymptom = (symptom) => {
       return;
     }
     try {
-      const response = await axios.post('http://localhost:5000/api/analysis', {
+      const response = await axios.post('https://med-drug-backend.onrender.com/api/analysis', {
     drugs: validDrugs.map(d => ({
       name: d.name,
       daily_dose: parseFloat(d.daily_dose)

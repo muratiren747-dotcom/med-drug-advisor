@@ -36,7 +36,7 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      const response = await axios.post('https://med-drug-backend.onrender.com/api/login', {
         username, password
       }, { withCredentials: true });
       localStorage.setItem('username', response.data.username);

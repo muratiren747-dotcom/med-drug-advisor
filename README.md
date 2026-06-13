@@ -74,7 +74,7 @@ pip install -r backend/requirements.txt
 cd backend
 python app.py
 ```
-*(The backend will run on `http://localhost:5000`. You can test it by running `curl http://localhost:5000/health` in a new terminal)*
+*(The backend will run on `https://med-drug-backend.onrender.com`. You can test it by running `curl https://med-drug-backend.onrender.com/health` in a new terminal)*
 
 
 

@@ -15,7 +15,7 @@ function Profile() {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/profile', { withCredentials: true })
+    axios.get('https://med-drug-backend.onrender.com/api/profile', { withCredentials: true })
       .then(res => {
         const data = res.data;
         if (data.age) setAge(data.age);
@@ -29,7 +29,7 @@ function Profile() {
 
   const handleUpdate = async () => {
     try {
-      await axios.put('http://localhost:5000/api/profile', {
+      await axios.put('https://med-drug-backend.onrender.com/api/profile', {
         age: parseInt(age),
         sex,
         weight: parseFloat(weight),
@@ -55,7 +55,7 @@ function Profile() {
 
     if (isConfirmed) {
       try {
-        await axios.delete('http://localhost:5000/api/account', { withCredentials: true });
+        await axios.delete('https://med-drug-backend.onrender.com/api/account', { withCredentials: true });
         localStorage.removeItem('username'); // Oturumu temizle
         window.location.href = '/login'; // Login sayfasına yönlendir
       } catch (err) {
