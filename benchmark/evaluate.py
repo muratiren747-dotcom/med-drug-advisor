@@ -44,11 +44,8 @@ def call_gemini(drug_entries, patient_data):
     from google import genai
     from google.genai import types
 
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        return ["ERROR: Gemini API key not found"], 0
 
-    client = genai.Client(api_key=api_key)
+    client = genai.Client()
 
     prompt = f"""You are a clinical pharmacist. Analyze the following drug combination for a patient and list safety warnings.
 
@@ -130,6 +127,7 @@ def run_single_benchmark(drug_entries, patient_data, our_result, our_time=0.02):
         result, t = call_gemini(drug_entries, patient_data)
         gemini_runs.append(result)
         gemini_times.append(t)
+        time.sleep(2)
 
     groq_runs, groq_times = [], []
     for i in range(NUM_RUNS):
