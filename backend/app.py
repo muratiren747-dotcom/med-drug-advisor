@@ -32,6 +32,8 @@ def create_app():
     """
     app = Flask(__name__)
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "dev-secret-CHANGE-ME")
+    app.config["SESSION_COOKIE_SAMESITE"] = "None"
+    app.config["SESSION_COOKIE_SECURE"] = True
 
     # Securely configures CORS to allow authenticated requests from the frontend origin
     CORS(app, supports_credentials=True, origins=["http://localhost:3000", "https://med-drug-advisor-h72zztgy6-durg-med-advisor.vercel.app"])
