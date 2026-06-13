@@ -70,10 +70,22 @@ function DrugInput({ index, drug, onChange, onRemove }) {
               style={styles.doseInput}
               type="number"
               placeholder="100"
-              min="1"
-              onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
+              min="0.1"
+              step="0.1"
+              onKeyDown={(e) => {
+                // Eksi işareti ve e (eksponansiyel) harfini engelle
+                if (e.key === '-' || e.key === 'e') e.preventDefault();
+              }}
               value={drug.daily_dose}
               onChange={(e) => onChange(index, 'daily_dose', e.target.value)}
+              onBlur={(e) => {
+                // Kullanıcı kutudan (inputtan) başka bir yere tıkladığında:
+                // Eğer değer boşsa veya 0 (ve altı) girildiyse, otomatik olarak 0.1'e yuvarla
+                const val = parseFloat(e.target.value);
+                if (!e.target.value || val <= 0) {
+                  onChange(index, 'daily_dose', '0.1');
+                }
+              }}
             />
             <span style={styles.mgLabel}>mg</span>
           </div>

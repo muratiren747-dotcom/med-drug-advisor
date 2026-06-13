@@ -90,14 +90,14 @@ function Profile() {
             <div style={styles.inputGroup}>
               <label style={styles.label}>Age</label>
               <input style={styles.input} type="number" placeholder="e.g., 32"
-                min="0"
+                min="1"
                 onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                 value={age} onChange={(e) => setAge(e.target.value)} />
             </div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Weight (kg)</label>
               <input style={styles.input} type="number" placeholder="e.g., 68"
-                min="0"
+                min="1"
                 onKeyDown={(e) => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                 value={weight} onChange={(e) => setWeight(e.target.value)} />
             </div>

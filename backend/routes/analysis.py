@@ -17,17 +17,11 @@ Layer : API Routing & Data Adapter Layer
 @analysis_bp.route("/analysis", methods=["POST"])
 @require_login
 def analyze():
-    # INTEGRATION & SECURITY LAYER
-    # Incoming JSON payload is validated. Empty or malformed requests are
-    # intercepted with a 400 Bad Request to ensure API security and data integrity.
-
     body = request.get_json() or {}
     drug_entries = body.get("drugs", [])
 
     if not drug_entries:
         return jsonify({"error": "no drugs provided"}), 400
-
-    # The authenticated patient's medical profile is securely retrieved from the SQLite database.
 
     patient = database_mgr.get_patient(session["username"])
     if patient is None:
@@ -39,32 +33,35 @@ def analyze():
 
     drug_objects = []
     daily_doses = {}
-    invalid = []
-
-    # DATA SANITIZATION & TYPE SAFETY
-    # Hidden whitespaces in drug names are stripped. The incoming daily dose
-    # is explicitly cast to a float to prevent TypeErrors during the core mathematical computations.
+    flat_warnings = []
 
     for entry in drug_entries:
-        name = entry.get("name", "").strip()
-        if not name:
+        original_name = entry.get("name", "").strip()
+        name_lower = original_name.lower()
+
+        if not name_lower:
             continue
-        if name not in drug_db:
-            invalid.append(name)
-            continue
-        drug_objects.append(drug_db[name])
+
+        # Guard (Koruyucu) Katmanı: Veritabanında yoksa analizi durdur
+        if name_lower not in drug_db:
+            return jsonify({
+                "error": f"'{original_name}' is not in our clinical database. Please select only supported medications."
+            }), 400
+
+        actual_drug = drug_db[name_lower]
+        drug_objects.append(actual_drug)
 
         try:
             dose = float(entry.get("daily_dose", 0))
         except (ValueError, TypeError):
             dose = 0.0
 
-        if dose < 0:
-            return jsonify({"error": f"dose for {name} cannot be negative"}), 400
+        if dose <= 0:
+            return jsonify({"error": f"dose for {actual_drug.name} cannot be zero or negative"}), 400
 
-        daily_doses[name] = dose
+        daily_doses[actual_drug.name] = dose
 
-    # The core analysis engine is triggered independently.
+    # Analiz Engine
     raw_report = analyzer.analyze(patient, drug_objects, daily_doses)
 
     # DATA NORMALIZATION (ADAPTER PATTERN)

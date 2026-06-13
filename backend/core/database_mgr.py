@@ -243,7 +243,7 @@ def load_drug_database(json_path):
 
     drugs_dict = {}
     for drug in list_of_drugs:
-        drugs_dict[drug["name"]] = Drug(
+        drugs_dict[drug["name"].lower()] = Drug(
             name=drug["name"],
             drug_class=drug.get("drug_class", "Unknown"),
             pathway=drug["pathway"],
